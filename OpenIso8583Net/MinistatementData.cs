@@ -1,12 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace OpenIso8583Net
 {
     /// <summary>
-    ///   This class parses Ministatement data in field 48 in the response message
+    ///   This class parses Mini statement data in field 48 in the response message
     /// </summary>
     public class MinistatementData : List<MinistatementLine>
     {
+        public static MinistatementData Unpack(string data)
+        {
+            var res = new MinistatementData();
+            res.FromMsg(data);
+            return res;
+        }
+
         /// <summary>
         ///   Parse the data out of the message
         /// </summary>
@@ -38,13 +46,33 @@ namespace OpenIso8583Net
                         if (string.IsNullOrEmpty(data))
                             data = null;
 
-                        msLine.Add(heading, data);
+                        msLine.Add(heading, data!);
                     }
                     else
-                        msLine.Add(heading, null);
+                        msLine.Add(heading, null!);
                 }
                 Add(msLine);
             }
+        }
+
+        /// <summary>
+        /// Convert back to a message
+        /// </summary>
+        /// <returns></returns>
+        public string ToMsg()
+        {
+            if (this.Count == 0)
+                return null!;
+
+            StringBuilder msg = new StringBuilder();
+            msg.Append(string.Join('|', this[0].Keys));
+
+            foreach (var line in this)
+            {
+                msg.Append('~');
+                msg.Append(string.Join('|', line.Values));
+            }
+            return msg.ToString();
         }
     }
 }

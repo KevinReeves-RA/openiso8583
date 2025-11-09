@@ -17,16 +17,30 @@ namespace OpenIso8583Net.Tests.ValidatorTests
             ValidValues.Add("1324234");
             ValidValues.Add("ab23c def");
             ValidValues.Add(".,?#'");
+
+            InvalidValues.Add("qwe\nrty");
+            InvalidValues.Add("qwerty\t");
+        }
+        [TestMethod]
+        public void TestAlphaNumericPrintableDescription()
+        {
+            var desc = this.FieldValidator.Description;
+            Assert.AreEqual("anp", desc);
         }
 
+
         [TestMethod]
-        public void TestAlphaNumericPrintableValidValues()
+#pragma warning disable S2699 // Add at least one assertion to this test case.
+        public void TestAnpValidValues()
+#pragma warning restore S2699 
         {
             TestValidValues();
         }
 
         [TestMethod]
-        public void TestAlphaNumericPrintableInvalidValues()
+#pragma warning disable S2699 // Add at least one assertion to this test case.
+        public void TestAnpInvalidValues()
+#pragma warning restore S2699
         {
             TestInvalidValues();
         }

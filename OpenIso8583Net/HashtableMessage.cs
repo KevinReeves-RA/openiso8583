@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace OpenIso8583Net
@@ -8,13 +9,19 @@ namespace OpenIso8583Net
     ///   String value pairs to be serialised and deserialised so that a Hashtable 
     ///   may be included in an ISO message
     /// </summary>
+    [Serializable]
     public class HashtableMessage : Dictionary<string, string>
     {
+        public HashtableMessage() : base() { }
+
+        protected HashtableMessage(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext) { }
+
         /// <summary>
-        ///   Initialiases the object from a string value
+        ///   Initialises the object from a string value
         /// </summary>
         /// <param name = "message">The string containing the data</param>
-        public void FromMessageString(string message)
+        public void FromMessageString(string? message)
         {
             var offset = 0;
 
@@ -68,5 +75,7 @@ namespace OpenIso8583Net
             }
             return sb.ToString();
         }
+
+
     }
 }

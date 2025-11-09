@@ -26,22 +26,27 @@ namespace OpenIso8583Net
         /// <summary>
         /// Gets the adjuster that will be applied during get value and set value
         /// </summary>
-        Adjuster Adjuster { get; }
+        Adjuster? Adjuster { get; }
 
         /// <summary>
         /// Gets the field formatter describing the field
         /// </summary>
-        IFormatter Formatter { get; }
+        IFormatter Formatter { get; set; }
 
         /// <summary>
         /// Gets the length formatter describing the field
         /// </summary>
-        ILengthFormatter LengthFormatter { get; }
+        ILengthFormatter LengthFormatter { get; set; }
 
         /// <summary>
         /// Gets the validator describing the field
         /// </summary>
         IFieldValidator Validator { get; }
+
+        /// <summary>
+        /// the field display name
+        /// </summary>
+        string DisplayName { get; }
 
         #endregion
 

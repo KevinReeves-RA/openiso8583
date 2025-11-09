@@ -21,15 +21,26 @@ namespace OpenIso8583Net.Tests.ValidatorTests
             ValidValues.Add("\t");
             ValidValues.Add("\n");
         }
+        [TestMethod]
+        public void TestNoneDescription()
+        {
+            var desc = this.FieldValidator.Description;
+            Assert.AreEqual("none", desc);
+        }
 
         [TestMethod]
+#pragma warning disable S2699 // Add at least one assertion to this test case
         public void TestNoneValidValues()
+#pragma warning restore S2699 
+
         {
             TestValidValues();
         }
 
         [TestMethod]
+#pragma warning disable S2699 // Add at least one assertion to this test case
         public void TestNoneInvalidValues()
+#pragma warning restore S2699 
         {
             TestInvalidValues();
         }

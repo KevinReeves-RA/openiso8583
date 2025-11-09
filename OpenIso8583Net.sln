@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11201.2 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIso8583Net", "OpenIso8583Net\OpenIso8583Net.csproj", "{87A6C762-3CED-441C-8B87-C8D39EB7E3A5}"
 EndProject
@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D6836A
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISO8583Display", "ISO8583Display\ISO8583Display.csproj", "{3BD54CA6-445A-B16B-9082-F2F34E4F9F5C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,8 +30,15 @@ Global
 		{051350C0-1587-4EA7-9560-415940B6626B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{051350C0-1587-4EA7-9560-415940B6626B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{051350C0-1587-4EA7-9560-415940B6626B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BD54CA6-445A-B16B-9082-F2F34E4F9F5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BD54CA6-445A-B16B-9082-F2F34E4F9F5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BD54CA6-445A-B16B-9082-F2F34E4F9F5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BD54CA6-445A-B16B-9082-F2F34E4F9F5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {15211D2D-0306-4FB4-A52D-702620563651}
 	EndGlobalSection
 EndGlobal

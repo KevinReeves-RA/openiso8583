@@ -9,9 +9,8 @@
 
 namespace OpenIso8583Net.Tests
 {
-    using System;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using System;
 
     /// <summary>
     /// This is a test class for ProcessingCodeTest and is intended to contain all ProcessingCodeTest Unit Tests
@@ -19,14 +18,6 @@ namespace OpenIso8583Net.Tests
     [TestClass]
     public class ProcessingCodeTest
     {
-        #region Public Properties
-
-        /// <summary>
-        ///  Gets or sets the test context which provides information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #endregion
 
         #region Public Methods and Operators
 
@@ -37,14 +28,7 @@ namespace OpenIso8583Net.Tests
         public void TestDataTooLong()
         {
             const string Data = "1234567";
-            try
-            {
-                new ProcessingCode(Data);
-                Assert.Fail("Failed length processing");
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.ThrowsExactly<ArgumentException>(() => new ProcessingCode(Data));
         }
 
         /// <summary>
@@ -54,14 +38,7 @@ namespace OpenIso8583Net.Tests
         public void TestDataTooShort()
         {
             const string Data = "12345";
-            try
-            {
-                new ProcessingCode(Data);
-                Assert.Fail("Failed length processing");
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.ThrowsExactly<ArgumentException>(() => new ProcessingCode(Data));
         }
 
         /// <summary>

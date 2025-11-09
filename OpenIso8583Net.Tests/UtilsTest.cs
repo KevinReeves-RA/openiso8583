@@ -17,15 +17,6 @@ namespace OpenIso8583Net.Tests
     [TestClass]
     public class UtilsTest
     {
-        #region Public Properties
-
-        /// <summary>
-        ///  Gets or sets the test context which provides information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #endregion
-
         #region Public Methods and Operators
 
         /// <summary>
@@ -35,13 +26,13 @@ namespace OpenIso8583Net.Tests
         public void MaskPanTest()
         {
             const string Pan = "1234567890123456";
-            const string Expected = "123456xxxxxx3456";
+            const string Expected = "12345678******56";
             var actual = Utils.MaskPan(Pan);
             Assert.AreEqual(Expected, actual);
 
             const string ShortPan = "1234567890";
             var actualShort = Utils.MaskPan(ShortPan);
-            Assert.AreEqual(ShortPan, actualShort);
+            Assert.AreEqual("******7890", actualShort);
         }
 
         #endregion

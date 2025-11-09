@@ -1,6 +1,4 @@
-﻿using OpenIso8583Net.FieldValidator;
-
-namespace OpenIso8583Net
+﻿namespace OpenIso8583Net
 {
     /// <summary>
     ///   Class representing a field
@@ -25,25 +23,25 @@ namespace OpenIso8583Net
 
         #region IField Members
 
-        private string _value;
+        private string _value = string.Empty;
         /// <summary>
         ///   The Value contained in the field
         /// </summary>
         /// adjustment is skipped if there is no Adjuster
-        public string Value 
-        { 
-            get 
-            { 
-                return _fieldDescriptor.Adjuster == null ? _value : _fieldDescriptor.Adjuster.Get(_value); 
+        public string Value
+        {
+            get
+            {
+                return _fieldDescriptor.Adjuster == null ? _value : _fieldDescriptor.Adjuster.Get(_value);
             }
-            set 
+            set
             {
                 _value = _fieldDescriptor.Adjuster == null ? value : _fieldDescriptor.Adjuster.Set(value);
             }
         }
 
         /// <summary>
-        ///   Gets the field number that this field representss
+        ///   Gets the field number that this field represents
         /// </summary>
         public int FieldNumber { get; private set; }
 
@@ -98,41 +96,5 @@ namespace OpenIso8583Net
         }
 
         #endregion
-
-        ///<summary>
-        ///  Create an ASCII fixed length field descriptor
-        ///</summary>
-        ///<param name = "fieldNumber">Field number</param>
-        ///<param name = "packedLength">The packed length of the field.  For BCD fields, this is half the size of the field you want</param>
-        ///<param name = "validator">Validator to use on the field</param>
-        ///<returns>field</returns>
-        public static IField AsciiFixed(int fieldNumber, int packedLength, IFieldValidator validator)
-        {
-            return new Field(fieldNumber, FieldDescriptor.AsciiFixed(packedLength, validator));
-        }
-
-        /// <summary>
-        ///   Create an ASCII variable length field
-        /// </summary>
-        /// <param name = "fieldNumber">field number</param>
-        /// <param name = "lengthIndicator">length indicator</param>
-        /// <param name = "maxLength">maximum length of field</param>
-        /// <param name = "validator">validator to use on the field</param>
-        /// <returns>field</returns>
-        public static IField AsciiVar(int fieldNumber, int lengthIndicator, int maxLength, IFieldValidator validator)
-        {
-            return new Field(fieldNumber, FieldDescriptor.AsciiVar(lengthIndicator, maxLength, validator));
-        }
-
-        /// <summary>
-        ///   Create a binary fixed length field
-        /// </summary>
-        /// <param name = "fieldNumber">field number</param>
-        /// <param name = "packedLength">length of the field</param>
-        /// <returns>field</returns>
-        public static IField BinFixed(int fieldNumber, int packedLength)
-        {
-            return new Field(fieldNumber, FieldDescriptor.BinaryFixed(packedLength));
-        }
     }
 }

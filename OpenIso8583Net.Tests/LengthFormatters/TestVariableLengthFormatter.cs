@@ -10,7 +10,7 @@
 namespace OpenIso8583Net.Tests.LengthFormatters
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+    using OpenIso8583Net.Formatter;
     using OpenIso8583Net.LengthFormatters;
 
     /// <summary>
@@ -24,7 +24,7 @@ namespace OpenIso8583Net.Tests.LengthFormatters
         /// <summary>
         /// The _formatter.
         /// </summary>
-        private readonly VariableLengthFormatter formatter = new VariableLengthFormatter(2, 12);
+        private readonly VariableLengthFormatter formatter = new VariableLengthFormatter(2, 12, Formatters.Ascii);
 
         #endregion
 

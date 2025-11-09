@@ -28,13 +28,24 @@ namespace OpenIso8583Net.Tests.ValidatorTests
         }
 
         [TestMethod]
-        public void TestRev87AmountValidatorValidValues()
+        public void TestDescription()
+        {
+            var desc = this.FieldValidator.Description;
+            Assert.AreEqual("amt", desc);
+        }
+
+        [TestMethod]
+#pragma warning disable S2699 // Add at least one assertion to this test case
+        public void TestAmtValidValues()
+#pragma warning restore S2699 
         {
             TestValidValues();
         }
 
         [TestMethod]
-        public void TestRev87AmountValidatorInvalidValues()
+#pragma warning disable S2699 // Add at least one assertion to this test case
+        public void TestAmtInvalidValues()
+#pragma warning restore S2699 
         {
             TestInvalidValues();
         }

@@ -7,7 +7,9 @@
     /// <summary>
     ///   Class representing a collection of EMV Tags
     /// </summary>
+#pragma warning disable S3925 // "ISerializable" should be implemented correctly
     public class EmvTags : Dictionary<Tag, byte[]>
+#pragma warning restore S3925 // "ISerializable" should be implemented correctly
     {
         #region Public Methods and Operators
 
@@ -83,7 +85,7 @@
             foreach (var kvp in this)
             {
                 sb.Append(indent);
-                var hexTag = "0x" + Convert.ToString((int)kvp.Key, 16);
+                var hexTag = Convert.ToString((int)kvp.Key, 16);
                 sb.Append(hexTag.PadRight(7, ' '));
                 sb.Append('\'');
                 sb.Append(kvp.Key.ToString().PadRight(20));
@@ -93,13 +95,13 @@
                     sb.Append(GetTagMasked(kvp.Key, Utils.ToHex(kvp.Value)));
                 }
 
-                sb.Append("]");
+                sb.Append(']');
                 sb.Append(Environment.NewLine);
             }
 
             var str = sb.ToString();
 
-            return str.Substring(0, str.Length - Environment.NewLine.Length);
+            return str[..^Environment.NewLine.Length];
         }
 
         /// <summary>
@@ -129,15 +131,11 @@
         /// </returns>
         private static string GetTagMasked(Tag tag, string value)
         {
-            switch (tag)
+            return tag switch
             {
-                case Tag.appl_pan:
-                case Tag.track2_eq_data:
-                case Tag.track1_disc_data:
-                    return "*".PadLeft(value.Length, '*');
-            }
-
-            return value;
+                Tag.appl_pan or Tag.track2_eq_data or Tag.track1_disc_data => "*".PadLeft(value.Length, '*'),
+                _ => value,
+            };
         }
 
         #endregion

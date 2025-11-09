@@ -28,5 +28,10 @@
         {
             get { return new BinaryFormatter(); }
         }
+
+        public static IFormatter Ebcdic
+        {
+            get { return new EbcdicFormatter(); }
+        }
     }
 }

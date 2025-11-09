@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace OpenIso8583Net.FieldValidator
 {
@@ -7,7 +8,7 @@ namespace OpenIso8583Net.FieldValidator
     /// </summary>
     public class Track2FieldValidator : IFieldValidator
     {
-        private static readonly Regex Matcher = new Regex(@"^\d{1,19}[=D]([=D]|\d{4})[=D]?\d*$");
+        private static readonly Regex Matcher = new Regex(@"^\d{1,19}[=D]([=D]|\d{4})[=D]?\d*$", RegexOptions.None, new TimeSpan(0, 0, 10));
 
         #region IFieldValidator Members
 
@@ -16,7 +17,7 @@ namespace OpenIso8583Net.FieldValidator
         /// </summary>
         public string Description
         {
-            get { return "z"; }
+            get { return "track2"; }
         }
 
         /// <summary>

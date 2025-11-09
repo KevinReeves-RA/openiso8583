@@ -5,6 +5,7 @@ namespace OpenIso8583Net.Exceptions
     /// <summary>
     ///   Exception class for an incorrectly formatted field
     /// </summary>
+    [Serializable]
     public class FieldFormatException : FormatException
     {
         /// <summary>
@@ -28,6 +29,11 @@ namespace OpenIso8583Net.Exceptions
             : base("Field Number : " + prefix + fieldNumber + Environment.NewLine + message)
         {
             FieldNumber = fieldNumber;
+        }
+
+        protected FieldFormatException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) : base(serializationInfo, streamingContext)
+        {
+
         }
 
         /// <summary>

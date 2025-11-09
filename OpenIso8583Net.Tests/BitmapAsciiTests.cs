@@ -24,16 +24,7 @@ namespace OpenIso8583Net.Tests
         /// <summary>
         /// The _bitmap.
         /// </summary>
-        private Bitmap bitmap;
-
-        #endregion
-
-        #region Public Properties
-
-        /// <summary>
-        ///  Gets or sets the test context which provides information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
+        private Bitmap bitmap = new Bitmap();
 
         #endregion
 

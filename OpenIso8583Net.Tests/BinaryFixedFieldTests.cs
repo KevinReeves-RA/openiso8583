@@ -9,14 +9,12 @@
 
 namespace OpenIso8583Net.Tests
 {
-    using System.Text;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using OpenIso8583Net.Exceptions;
     using OpenIso8583Net.FieldValidator;
     using OpenIso8583Net.Formatter;
     using OpenIso8583Net.LengthFormatters;
+    using System.Text;
 
     /// <summary>
     /// Fixed field tests
@@ -24,14 +22,7 @@ namespace OpenIso8583Net.Tests
     [TestClass]
     public class BinaryFixedFieldTests
     {
-        #region Public Properties
 
-        /// <summary>
-        ///  Gets or sets the test context which provides information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #endregion
 
         #region Public Methods and Operators
 

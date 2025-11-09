@@ -28,13 +28,14 @@ namespace OpenIso8583Net.Tests
         public void TestPackUnpack()
         {
             var msg = new IsoMsgBinaryMsgTypeFormatter();
-            msg.MessageType = Iso8583.MsgType._0200_TRAN_REQ;
+            msg.MessageType = 200;
             msg[Iso8583.Bit._002_PAN] = "4005550000000001";
             msg[Iso8583.Bit._003_PROC_CODE] = "000000";
 
             byte[] data = msg.ToMsg();
             var unpackedMsg = new IsoMsgBinaryMsgTypeFormatter();
             unpackedMsg.Unpack(data, 0);
+            Assert.AreEqual(200, unpackedMsg.MessageType);
         }
 
         #endregion

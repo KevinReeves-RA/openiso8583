@@ -57,29 +57,23 @@ namespace OpenIso8583Net
         /// </summary>
         /// <param name="pan">a PAN string</param>
         /// <returns>a masked PAN string</returns>
-        public static string MaskPan(string pan)
+        public static string? MaskPan(string? pan)
         {
-            if (pan == null)
-                return null;
-
-            const int frontLength = 6;
-            const int endLength = 4;
-            const int unmaskedLength = frontLength + endLength;
-
-            var totalLength = pan.Length;
-
-            if (totalLength <= unmaskedLength)
+            if (string.IsNullOrWhiteSpace(pan))
                 return pan;
 
-            return
-                new StringBuilder(totalLength, totalLength)
-                    .Append(pan.Substring(0, frontLength)) // front
-                    .Append(new string('x', totalLength - unmaskedLength))  // mask
-                    .Append(pan.Substring((totalLength - endLength), endLength)) // end
-                    .ToString();
+            if (pan.Length <= 4)
+                return pan;
+
+            // if 16-18 long <first 6>****<last 4>, length preserved, not sure if allowed
+            if (pan.Length >= 16)
+                return string.Concat(pan[..8], "*".PadRight(pan.Length - 10, '*'), pan[^2..]);
+
+            // less than 16... just return the last 4
+            return pan[^4..].PadLeft(pan.Length, '*');
         }
 
-          /// <summary>
+        /// <summary>
         /// Convert a byte array to a hex string
         /// </summary>
         /// <param name="data">
@@ -126,7 +120,7 @@ namespace OpenIso8583Net
                 {
                     var b = data[i];
                     sb.Append(Convert.ToString(b, 16).ToUpper().PadLeft(2, '0'));
-                    sb.Append(" ");
+                    sb.Append(' ');
                     textBuilder.Append(GetChar(b));
                 }
 
@@ -135,7 +129,7 @@ namespace OpenIso8583Net
                     sb.Append(' ', (lineOffset + 16 - endOffset) * 3);
                 }
 
-                sb.Append(" ");
+                sb.Append(' ');
                 sb.Append(textBuilder);
 
                 sb.Append(Environment.NewLine);
@@ -166,7 +160,7 @@ namespace OpenIso8583Net
             return bytes;
         }
 
-       /// <summary>
+        /// <summary>
         /// Get a printable character for a byte. Used in DebugPrint
         /// </summary>
         /// <param name="b">

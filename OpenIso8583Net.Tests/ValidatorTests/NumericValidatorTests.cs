@@ -24,13 +24,25 @@ namespace OpenIso8583Net.Tests.ValidatorTests
         }
 
         [TestMethod]
+        public void TestDescription()
+        {
+            var desc = this.FieldValidator.Description;
+            Assert.AreEqual("n", desc);
+        }
+
+        [TestMethod]
+#pragma warning disable S2699 // Add at least one assertion to this test case
         public void TestNumericValidValues()
+#pragma warning restore S2699
+
         {
             TestValidValues();
         }
 
         [TestMethod]
+#pragma warning disable S2699 // Add at least one assertion to this test case
         public void TestNumericInvalidValues()
+#pragma warning restore S2699
         {
             TestInvalidValues();
         }

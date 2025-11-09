@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenIso8583Net.Formatter;
 using OpenIso8583Net.TermAppIso;
 
 namespace OpenIso8583Net.Tests.TermAppIso
@@ -8,21 +8,22 @@ namespace OpenIso8583Net.Tests.TermAppIso
     public class StructuredDataTests
     {
         [TestMethod]
-        public void testField48NoF16()
+        public void TestField48NoF16()
         {
             Iso8583TermApp msg = new Iso8583TermApp();
-            AdditionalData addData = new AdditionalData();
+            AdditionalData addData = new AdditionalData(Formatters.Ascii);
             addData.Add(AdditionalData.Field.PosData, "123456");
             msg.AdditionalData = addData;
             Assert.IsTrue(msg.IsFieldSet(Iso8583Rev93.Bit._048_PRIVATE_ADDITIONAL_DATA));
-            Assert.IsNull(msg.StructuredData);
+            Assert.AreEqual(0, msg.StructuredData.Count);
+            //Assert.IsNull(msg.StructuredData);
         }
 
         [TestMethod]
-        public void testGetStructuredData()
+        public void TestGetStructuredData()
         {
             Iso8583TermApp msg = new Iso8583TermApp();
-            AdditionalData addData = new AdditionalData();
+            AdditionalData addData = new AdditionalData(Formatters.Ascii);
             addData.Add(AdditionalData.Field.StructuredData, "13PSI11V");
             msg.AdditionalData = addData;
             Assert.IsTrue(msg.IsFieldSet(Iso8583Rev93.Bit._048_PRIVATE_ADDITIONAL_DATA));
@@ -31,29 +32,30 @@ namespace OpenIso8583Net.Tests.TermAppIso
         }
 
         [TestMethod]
-        public void testNoField48()
+        public void TestNoField48()
         {
             Iso8583TermApp msg = new Iso8583TermApp();
             Assert.IsFalse(msg.IsFieldSet(Iso8583Rev93.Bit._048_PRIVATE_ADDITIONAL_DATA));
-            Assert.IsNull(msg.StructuredData);
+            Assert.AreEqual(0, msg.StructuredData.Count);
+            //Assert.IsNull(msg.StructuredData);
         }
 
         [TestMethod]
-        public void testPutStructuredDataEmtpy()
+        public void TestPutStructuredDataEmtpy()
         {
             Iso8583TermApp msg = new Iso8583TermApp();
             HashtableMessage sd = new HashtableMessage();
             sd["PSI"] = "V";
             msg.StructuredData = sd;
-            AdditionalData addData = msg.AdditionalData;
+            AdditionalData addData = msg.AdditionalData!;
             Assert.AreEqual("13PSI11V", addData[AdditionalData.Field.StructuredData]);
         }
 
         [TestMethod]
-        public void testPutStructuredDataExistingAddData()
+        public void TestPutStructuredDataExistingAddData()
         {
             Iso8583TermApp msg = new Iso8583TermApp();
-            AdditionalData addData = new AdditionalData();
+            AdditionalData addData = new AdditionalData(Formatters.Ascii);
             addData[AdditionalData.Field.PosData] = "FieldData";
             msg.AdditionalData = addData;
             HashtableMessage sd = new HashtableMessage();
@@ -65,14 +67,14 @@ namespace OpenIso8583Net.Tests.TermAppIso
             Assert.IsTrue(checkSd.ContainsKey("ABC"));
 
             AdditionalData checkData = msg.AdditionalData;
-            Assert.AreEqual(checkData[AdditionalData.Field.PosData], "FieldData");
+            Assert.AreEqual("FieldData", checkData[AdditionalData.Field.PosData]);
         }
 
         [TestMethod]
-        public void testPutStructuredDataExistingSd()
+        public void TestPutStructuredDataExistingSd()
         {
             Iso8583TermApp msg = new Iso8583TermApp();
-            AdditionalData addData = new AdditionalData();
+            AdditionalData addData = new AdditionalData(Formatters.Ascii);
             addData[AdditionalData.Field.StructuredData] = "13PSI11V";
             msg.AdditionalData = addData;
             HashtableMessage sd = new HashtableMessage();

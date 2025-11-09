@@ -1,20 +1,20 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenIso8583Net.NetworkHeaders;
+using System;
 
 namespace OpenIso8583Net.Tests.NetworkHeaders
 {
     [TestClass]
     public class TestTwoByteHeader
     {
-        private Iso8583 _origMsg;
-        private byte[] _packedData;
-        private Iso8583 _unpackedMsg;
+        private Iso8583? _origMsg;
+        private byte[]? _packedData;
+        private Iso8583? _unpackedMsg;
 
         [TestInitialize]
         public void Setup()
         {
-            _origMsg = new Iso8583 { MessageType = Iso8583.MsgType._0200_TRAN_REQ };
+            _origMsg = new Iso8583 { MessageType = 200 };
             _origMsg[3] = "090000";
             var header = new TwoByteHeader();
 
@@ -33,16 +33,16 @@ namespace OpenIso8583Net.Tests.NetworkHeaders
         [TestMethod]
         public void TestLength()
         {
-            var actual = _packedData.Length;
-            var expected = _origMsg.PackedLength + 2;
+            var actual = _packedData?.Length;
+            var expected = _origMsg?.PackedLength + 2;
             Assert.AreEqual(expected, actual);
         }
 
         [TestMethod]
         public void TestField()
         {
-            var expected = _origMsg[3];
-            var actual = _unpackedMsg[3];
+            var expected = _origMsg?[3];
+            var actual = _unpackedMsg?[3];
             Assert.AreEqual(expected, actual);
         }
     }

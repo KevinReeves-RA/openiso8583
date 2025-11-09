@@ -6,7 +6,7 @@
     public interface IField
     {
         /// <summary>
-        ///   Gets the field number that this field representss
+        ///   Gets the field number that this field represents
         /// </summary>
         int FieldNumber { get; }
 

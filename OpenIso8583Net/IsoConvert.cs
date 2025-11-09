@@ -1,9 +1,5 @@
-﻿using System.Text;
-
-namespace OpenIso8583Net
+﻿namespace OpenIso8583Net
 {
-    using System;
-
     /// <summary>
     ///   Convert methods for the ISO message builder
     /// </summary>
@@ -69,7 +65,7 @@ namespace OpenIso8583Net
         /// <returns>A string representing the message type</returns>
         public static string FromIntToMsgType(int value)
         {
-            return Encoding.ASCII.GetString(FromIntToMsgTypeData(value));
+            return value.ToString("0000");
         }
 
         /// <summary>
@@ -79,7 +75,7 @@ namespace OpenIso8583Net
         /// <returns></returns>
         public static int FromMsgTypeToInt(string msgType)
         {
-            return FromMsgTypeDataToInt(Encoding.ASCII.GetBytes(msgType));
+            return int.Parse(msgType);
         }
     }
 }

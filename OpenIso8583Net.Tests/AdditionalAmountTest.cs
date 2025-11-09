@@ -9,9 +9,8 @@
 
 namespace OpenIso8583Net.Tests
 {
-    using System;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using System;
 
     /// <summary>
     /// This is a test class for AdditionalAmountTest and is intended to contain all AdditionalAmountTest Unit Tests
@@ -19,15 +18,6 @@ namespace OpenIso8583Net.Tests
     [TestClass]
     public class AdditionalAmountTest
     {
-        #region Public Properties
-
-        /// <summary>
-        /// Gets or sets the test context which provides information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #endregion
-
         #region Public Methods and Operators
 
         /// <summary>
@@ -47,14 +37,7 @@ namespace OpenIso8583Net.Tests
         public void TestConstructorTooLong()
         {
             const string Input = "1001840C0000000220000";
-            try
-            {
-                new AdditionalAmount(Input);
-                Assert.Fail("Expected ArgumentException");
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.ThrowsExactly<ArgumentException>(() => new AdditionalAmount(Input));
         }
 
         /// <summary>
@@ -64,14 +47,7 @@ namespace OpenIso8583Net.Tests
         public void TestConstructorTooShort()
         {
             const string Input = "1001840C00000002200";
-            try
-            {
-                new AdditionalAmount(Input);
-                Assert.Fail("Expected ArgumentException");
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.ThrowsExactly<ArgumentException>(() => new AdditionalAmount(Input));
         }
 
         /// <summary>
@@ -81,9 +57,13 @@ namespace OpenIso8583Net.Tests
         public void TestToString()
         {
             var amount = new AdditionalAmount
-                {
-                   AccountType = "10", Amount = "200", AmountType = "01", CurrencyCode = "840", Sign = "C" 
-                };
+            {
+                AccountType = "10",
+                Amount = "200",
+                AmountType = "01",
+                CurrencyCode = "840",
+                Sign = "C"
+            };
             var actual = amount.ToString();
             const string Expected = "1001840C000000000200";
             Assert.AreEqual(Expected, actual);
@@ -111,9 +91,11 @@ namespace OpenIso8583Net.Tests
         [TestMethod]
         public void TestValueNegative()
         {
-            var amount = new AdditionalAmount();
-            amount.Sign = "D";
-            amount.Amount = "000002000000";
+            var amount = new AdditionalAmount
+            {
+                Sign = "D",
+                Amount = "000002000000"
+            };
             const long Expected = -2000000;
             var actual = amount.Value;
             Assert.AreEqual(Expected, actual);
@@ -125,9 +107,11 @@ namespace OpenIso8583Net.Tests
         [TestMethod]
         public void TestValuePositive()
         {
-            var amount = new AdditionalAmount();
-            amount.Sign = "C";
-            amount.Amount = "000002000000";
+            var amount = new AdditionalAmount
+            {
+                Sign = "C",
+                Amount = "000002000000"
+            };
             const long Expected = 2000000;
             var actual = amount.Value;
             Assert.AreEqual(Expected, actual);

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ISO8583Display": {
+      "commandName": "Project",
+      "commandLineArgs": "-p mc -ct -dn -csv -f \"C:\\Temp\\MC-R111\\R111*.ipm\""
+    }
+  }
+}

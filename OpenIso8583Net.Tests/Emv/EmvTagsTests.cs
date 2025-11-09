@@ -1,9 +1,9 @@
 ﻿namespace OpenIso8583Net.Tests.Emv
 {
-    using System.Text;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using OpenIso8583Net.Emv;
+    using System;
+    using System.Text;
 
     /// <summary>
     ///     Test EMV Tags
@@ -74,8 +74,8 @@
         {
             var tags = new EmvTags
                            {
-                               { Tag.appl_id, "a0000000031010".ToByteArray() }, 
-                               { Tag.tran_date, "100824".ToByteArray() }
+                               { Tag.appl_id, "a0000000031010".ToByteArray() },
+                               { Tag.tran_local_date, "100824".ToByteArray() }
                            };
             byte[] expected = "9f0607a00000000310109a03100824".ToByteArray();
             byte[] actual = tags.Pack();
@@ -89,8 +89,8 @@
         public void TestSingleItemToString()
         {
             var tags = new EmvTags();
-            tags.AddBcd(Tag.tran_date, "100824");
-            var expected = "0x9a   'tran_date           ' = [100824]";
+            tags.AddBcd(Tag.tran_local_date, "100824");
+            var expected = "9a     'tran_local_date     ' = [100824]";
             var actual = tags.ToString();
             Assert.AreEqual(expected, actual);
         }
@@ -102,10 +102,11 @@
         public void TestTwoItemsToString()
         {
             var tags = new EmvTags();
-            tags.AddBcd(Tag.tran_date, "100824");
+            tags.AddBcd(Tag.tran_local_date, "100824");
             tags.AddBcd(Tag.term_county_code, "710");
-            var expected = "0x9a   'tran_date           ' = [100824]"+Environment.NewLine +
-                           "0x9f1a 'term_county_code    ' = [0710]";
+            var expected = "9a     'tran_local_date     ' = [100824]" + Environment.NewLine +
+                           "9f1a   'term_county_code    ' = [0710]";
+            //"9f1a 'term_county_code    ' = [0710]";
             var actual = tags.ToString();
             Assert.AreEqual(expected, actual);
         }
@@ -119,11 +120,19 @@
             var msg = "9f0607a00000000310109a03100824".ToByteArray();
             var tags = EmvUtils.UnpackEmvTags(msg);
             Assert.AreEqual(2, tags.Count);
-            var date = tags[Tag.tran_date];
+            var date = tags[Tag.tran_local_date];
             var appl = tags[Tag.appl_id];
             CollectionAssert.AreEqual("100824".ToByteArray(), date);
             CollectionAssert.AreEqual("a0000000031010".ToByteArray(), appl);
         }
+
+        //[TestMethod]
+        //public void TestUnpack2()
+        //{
+        //    //var msg = "7C1B5F6C0000000000000000110000000000000014A000000003101038000014B26B59E0D75B4EE180420300000009054606011203A0A0020F030000000000000000000018CC90ED0140E0F0C871022008004100015623042100D2EB6101".ToByteArray();
+        //    //var tags = EmvUtils.UnpackEmvTags(msg);
+        //    //Assert.AreEqual(2, tags.Count);
+        //}
 
         #endregion
     }

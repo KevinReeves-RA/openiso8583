@@ -11,10 +11,10 @@ namespace OpenIso8583Net
         ///   Create a new processing code using the given data
         /// </summary>
         /// <param name = "data">The value to unpack</param>
-        public ProcessingCode(String data)
+        public ProcessingCode(string data)
         {
             if (data.Length != 6)
-                throw new ArgumentException("Incorrect length for data", "data");
+                throw new ArgumentException("Incorrect length for data", nameof(data));
             TranType = data.Substring(0, 2);
             FromAccountType = data.Substring(2, 2);
             ToAccountType = data.Substring(4, 2);

@@ -7,15 +7,15 @@ namespace OpenIso8583Net
     /// </summary>
     public class LambdaAdjuster : Adjuster
     {
-        private readonly Func<string, string> _getLambda;
-        private readonly Func<string, string> _setLambda;
+        private readonly Func<string, string>? _getLambda;
+        private readonly Func<string, string>? _setLambda;
 
         /// <summary>
         /// Allows an arbitrary transformation of a Field value before it is set
         /// </summary>
         /// <param name="getLambda">fieldValue => adjustedFieldValue; get adjustment lambda expression</param>
         /// <param name="setLambda">fieldValue => adjustedFieldValue; set adjustment lambda expression</param>
-        public LambdaAdjuster(Func<string,string> getLambda = null, Func<string,string> setLambda = null)
+        public LambdaAdjuster(Func<string, string>? getLambda = null, Func<string, string>? setLambda = null)
         {
             _getLambda = getLambda;
             _setLambda = setLambda;

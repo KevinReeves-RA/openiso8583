@@ -1,7 +1,8 @@
-﻿using System;
-using System.Text;
-using OpenIso8583Net.Exceptions;
+﻿using OpenIso8583Net.Exceptions;
 using OpenIso8583Net.FieldValidator;
+using System;
+using System.Text;
+using System.Text.Json.Serialization;
 
 namespace OpenIso8583Net
 {
@@ -15,8 +16,9 @@ namespace OpenIso8583Net
         #region IField Members
 
         /// <summary>
-        ///   Gets the field number that this field representss
+        ///   Gets the field number that this field represents
         /// </summary>
+        [JsonIgnore]
         public int FieldNumber
         {
             get { return 127; }
@@ -25,15 +27,17 @@ namespace OpenIso8583Net
         /// <summary>
         ///   The Value contained in the field
         /// </summary>
+        [JsonIgnore]
         public string Value
         {
-            get { throw new NotImplementedException(); }
+            get { return null!; }
             set { throw new NotImplementedException(); }
         }
 
         /// <summary>
         ///   Gets the packed length of the message
         /// </summary>
+        [JsonIgnore]
         public new int PackedLength
         {
             get { return 6 + base.PackedLength; }
@@ -65,7 +69,7 @@ namespace OpenIso8583Net
             // Field 127 is actually a bitmap message but inside a field in Iso8583Post.  That field
             // has a length indicator of 6 bytes, so lets just ignore it.
             // Yes I should be checking that everything adds up
-            // TODO Stop being a muppet and check it
+            // Future: Stop being a Muppet and check the length indicator
             return base.Unpack(msg, 6 + startingOffset);
         }
 
@@ -79,47 +83,66 @@ namespace OpenIso8583Net
         {
             var template = new Template
                 {
-                    { Bit._002_SWITCH_KEY,          FieldDescriptor.AsciiVar( 2, 32,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._003_ROUTING_INFORMATION,    FieldDescriptor.AsciiFixed( 48,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._004_POS_DATA,    FieldDescriptor.AsciiFixed( 22,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._005_SERVICE_STATION_DATA,    FieldDescriptor.AsciiFixed( 73,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._006_AUTH_PROFILE,    FieldDescriptor.AsciiFixed(2, FieldValidators.AlphaNumeric)},
-                    { Bit._007_CHECK_DATA,    FieldDescriptor.AsciiVar(2, 70,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._008_RETENTION_DATA,    FieldDescriptor.AsciiVar( 3, 999,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._009_ADDITIONAL_NODE_DATA,    FieldDescriptor.AsciiVar( 3, 999,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._010_CVV2,    FieldDescriptor.AsciiFixed(3,FieldValidators.Numeric)},
-                    { Bit._011_ORIG_KEY,    FieldDescriptor.AsciiVar(2, 32,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._012_TERM_OWNER,    FieldDescriptor.AsciiVar(2, 25,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._013_POS_GEOGRAPHIC_DATA,    FieldDescriptor.AsciiFixed(17, FieldValidators.AlphaNumericSpecial)},
-                    { Bit._014_SPONSOR_BANK,    FieldDescriptor.AsciiFixed(8,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._015_ADDRESS_VERIFICATION_DATA,    FieldDescriptor.AsciiVar(2, 29,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._016_ADDRESS_VERIFICATION_RESULT,    FieldDescriptor.AsciiFixed(1,FieldValidators.Alpha)},
-                    { Bit._017_CARDHOLDER_INFORMATION,    FieldDescriptor.AsciiVar( 2, 50,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._018_VALIDATION_DATA,    FieldDescriptor.AsciiVar(2, 50,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._019_BANK_DETAILS,    FieldDescriptor.AsciiFixed(31,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._020_ORIG_AUTH_DATE_SETTLEMENT,    FieldDescriptor.AsciiFixed(8,FieldValidators.Numeric)},
-                    { Bit._021_RECORD_ID,    FieldDescriptor.AsciiVar(2, 12,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._022_STRUCTURED_DATA,    FieldDescriptor.AsciiVar(5, 99999,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._023_PAYEE_NAME_ADDR,    FieldDescriptor.AsciiFixed( 253,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._024_PAYER_ACC_ID,    FieldDescriptor.AsciiVar( 2, 28,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._025_ICC_DATA,    FieldDescriptor.AsciiVar( 4, 9999,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._026_ORIGINAL_NODE,    FieldDescriptor.AsciiVar( 2, 20,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._027_CARD_VERIFICATION_RESULT,    FieldDescriptor.AsciiFixed( 1,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._028_AMEX_CARD_ID,    FieldDescriptor.AsciiFixed(4,FieldValidators.Numeric)},
-                    { Bit._029_3D_SECURE_DATA,    FieldDescriptor.AsciiFixed(40,FieldValidators.Hex)},
-                    { Bit._030_3D_SECURE_RESULT,    FieldDescriptor.AsciiFixed(1,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._031_ISSUER_NETWORK_ID,    FieldDescriptor.AsciiVar( 2, 11,FieldValidators.AlphaNumericSpecial)},
-                    { Bit._032_UCAF_DATA,    FieldDescriptor.AsciiVar( 2, 33,FieldValidators.Hex)},
-                    { Bit._033_EXTENDED_TRAN_TYPE,    FieldDescriptor.AsciiFixed( 4,FieldValidators.Numeric)},
-                    { Bit._034_ACC_TYPE_QUALIFIERS,    FieldDescriptor.AsciiFixed( 2,FieldValidators.Numeric)},
-                    { Bit._035_ACQ_NETWORK_ID,    FieldDescriptor.AsciiVar( 2, 11, FieldValidators.AlphaNumericSpecial)},
-                    { Bit._036_CUSTOMER_ID,    FieldDescriptor.AsciiVar( 2, 25, FieldValidators.AlphaNumericSpecial)},
-                    { Bit._037_EXTENDED_RESPONSE_CODE,    FieldDescriptor.AsciiFixed( 4, FieldValidators.AlphaNumeric)},
-                    { Bit._038_ADDITIONAL_POS_DATA_CODE,    FieldDescriptor.AsciiVar( 2, 99, FieldValidators.AlphaNumeric)},
-                    { Bit._039_ORIG_RESPONSE_CODE,    FieldDescriptor.AsciiFixed( 2, FieldValidators.AlphaNumeric)},
-                    { Bit._40_TRANSACTION_REFERENCE,    FieldDescriptor.AsciiVar( 3, 512, FieldValidators.AlphaNumericSpecial)},
-                    { Bit._41_ORIGINATING_REMOTE_ADDR,    FieldDescriptor.AsciiVar( 2, 99, FieldValidators.AlphaNumericSpecial)},
-                    { Bit._42_TRANSACTION_NUMBER,    FieldDescriptor.AsciiVar( 2, 99, FieldValidators.Numeric)}  //NOTE: the RTFW 5.5 Interface spec has a typo, the field is 'n..99, LLVAR' and *not* 'n..10, LLVAR' as described in the spec.
+                    { Bit._002_SWITCH_KEY,          FieldDescriptor.AsciiVar( 2, 32,FieldValidators.AlphaNumericSpecial,         "Switch Key")},
+                    { Bit._003_ROUTING_INFORMATION,    FieldDescriptor.AsciiFixed( 48,FieldValidators.AlphaNumericSpecial,       "Routing Info")},
+                    { Bit._004_POS_DATA,    FieldDescriptor.AsciiFixed( 22,FieldValidators.AlphaNumericSpecial,                  "POS Data")},
+                    { Bit._005_SERVICE_STATION_DATA,    FieldDescriptor.AsciiFixed( 73,FieldValidators.AlphaNumericSpecial,      "Svc Stn Data")},
+                    { Bit._006_AUTH_PROFILE,    FieldDescriptor.AsciiFixed(2, FieldValidators.AlphaNumeric,                      "Auth Profile")},
+                    { Bit._007_CHECK_DATA,    FieldDescriptor.AsciiVar(2, 70,FieldValidators.AlphaNumericSpecial,                "Check Data")},
+                    { Bit._008_RETENTION_DATA,    FieldDescriptor.AsciiVar( 3, 999,FieldValidators.AlphaNumericSpecial,          "Retention Data")},
+                    { Bit._009_ADDITIONAL_NODE_DATA,    FieldDescriptor.AsciiVar( 3, 999,FieldValidators.AlphaNumericSpecial,    "Node Data")},
+                    { Bit._010_CVV2,    FieldDescriptor.AsciiFixed(3,FieldValidators.Numeric,                                    "CVV2")},
+                    { Bit._011_ORIG_KEY,    FieldDescriptor.AsciiVar(2, 32,FieldValidators.AlphaNumericSpecial,                  "Original Key")},
+                    { Bit._012_TERM_OWNER,    FieldDescriptor.AsciiVar(2, 25,FieldValidators.AlphaNumericSpecial,                "Term Owner")},
+                    { Bit._013_POS_GEOGRAPHIC_DATA,    FieldDescriptor.AsciiFixed(17, FieldValidators.AlphaNumericSpecial,       "POS Geo Data")},
+                    { Bit._014_SPONSOR_BANK,    FieldDescriptor.AsciiFixed(8,FieldValidators.AlphaNumericSpecial,                "Sponsor Bank")},
+                    { Bit._015_ADDRESS_VERIFICATION_DATA,    FieldDescriptor.AsciiVar(2, 29,FieldValidators.AlphaNumericSpecial, "Addr Veri Data")},
+                    { Bit._016_ADDRESS_VERIFICATION_RESULT,    FieldDescriptor.AsciiFixed(1,FieldValidators.Alpha,               "Addr Veri Res.")},
+                    { Bit._017_CARDHOLDER_INFORMATION,    FieldDescriptor.AsciiVar( 2, 50,FieldValidators.AlphaNumericSpecial,   "Card Holder")},
+                    { Bit._018_VALIDATION_DATA,    FieldDescriptor.AsciiVar(2, 50,FieldValidators.AlphaNumericSpecial,           "Validation")},
+                    { Bit._019_BANK_DETAILS,    FieldDescriptor.AsciiFixed(31,FieldValidators.AlphaNumericSpecial,               "Bank Details")},
+                    { Bit._020_ORIG_AUTH_DATE_SETTLEMENT,    FieldDescriptor.AsciiFixed(8,FieldValidators.Numeric,               "Orig Auth Date")},
+                    { Bit._021_RECORD_ID,    FieldDescriptor.AsciiVar(2, 12,FieldValidators.AlphaNumericSpecial,                 "Record ID")},
+                    { Bit._022_STRUCTURED_DATA,    FieldDescriptor.AsciiVar(5, 99999,FieldValidators.AlphaNumericSpecial,        "Structured Data")},
+                    { Bit._023_PAYEE_NAME_ADDR,    FieldDescriptor.AsciiFixed( 253,FieldValidators.AlphaNumericSpecial,          "Payee Details")},
+                    { Bit._024_PAYER_ACC_ID,    FieldDescriptor.AsciiVar( 2, 28,FieldValidators.AlphaNumericSpecial,             "Payer Acct ID")},
+                    { Bit._025_ICC_DATA,    FieldDescriptor.AsciiVar( 4, 9999,FieldValidators.AlphaNumericSpecial,               "ICC Data")},
+                    { Bit._026_ORIGINAL_NODE,    FieldDescriptor.AsciiVar( 2, 20,FieldValidators.AlphaNumericSpecial,            "Original Node")},
+                    { Bit._027_CARD_VERIFICATION_RESULT,    FieldDescriptor.AsciiFixed( 1,FieldValidators.AlphaNumericSpecial,   "Card Veri Res.")},
+                    { Bit._028_AMEX_CARD_ID,    FieldDescriptor.AsciiFixed(4,FieldValidators.Numeric,                            "Amex Card ID")},
+                    { Bit._029_3D_SECURE_DATA,    FieldDescriptor.AsciiFixed(40,FieldValidators.Hex,                             "3d Sec. Data")},
+                    { Bit._030_3D_SECURE_RESULT,    FieldDescriptor.AsciiFixed(1,FieldValidators.AlphaNumericSpecial,            "3d Sec. Result")},
+                    { Bit._031_ISSUER_NETWORK_ID,    FieldDescriptor.AsciiVar( 2, 11,FieldValidators.AlphaNumericSpecial,        "Issuer Network")},
+                    { Bit._032_UCAF_DATA,    FieldDescriptor.AsciiVar( 2, 33,FieldValidators.Hex,                                "UCAF Data")},
+                    { Bit._033_EXTENDED_TRAN_TYPE,    FieldDescriptor.AsciiFixed( 4,FieldValidators.Numeric,                     "Ext Tran Type")},
+                    { Bit._034_ACC_TYPE_QUALIFIERS,    FieldDescriptor.AsciiFixed( 2,FieldValidators.Numeric,                    "Acct Type Quali")},
+                    { Bit._035_ACQ_NETWORK_ID,    FieldDescriptor.AsciiVar( 2, 11, FieldValidators.AlphaNumericSpecial,          "Acq Network ID")},
+                    { Bit._036_CUSTOMER_ID,    FieldDescriptor.AsciiVar( 2, 25, FieldValidators.AlphaNumericSpecial,             "Customer ID")},
+                    { Bit._037_EXTENDED_RESPONSE_CODE,    FieldDescriptor.AsciiFixed( 4, FieldValidators.AlphaNumeric,           "Extended Res.")},
+                    { Bit._038_ADDITIONAL_POS_DATA_CODE,    FieldDescriptor.AsciiVar( 2, 99, FieldValidators.AlphaNumeric,       "Add POS Data")},
+                    { Bit._039_ORIG_RESPONSE_CODE,    FieldDescriptor.AsciiFixed( 2, FieldValidators.AlphaNumeric,               "Orig Resp Code")},
+                    { Bit._040_TRANSACTION_REFERENCE,    FieldDescriptor.AsciiVar( 3, 512, FieldValidators.AlphaNumericSpecial,   "Txn Ref")},
+                    { Bit._041_ORIGINATING_REMOTE_ADDR,    FieldDescriptor.AsciiVar( 2, 99, FieldValidators.AlphaNumericSpecial,  "Origin Addr")},
+                    { Bit._042_TRANSACTION_NUMBER,    FieldDescriptor.AsciiVar( 2, 99, FieldValidators.Numeric,                   "Txn Num")},  //NOTE: the RTFW 5.5 Interface spec has a typo, the field is 'n..99, LLVAR' and *not* 'n..10, LLVAR' as described in the spec.
+
+                    // KR : added
+                    { Bit._043_ROUTING_NETWORK_ID, FieldDescriptor.AsciiFixed(4, FieldValidators.Numeric,                                    "Network Routing") },
+                    { Bit._044_EXTENDED_CARD_ACCEPTOR_TERMINAL_ID, FieldDescriptor.AsciiVar(2,25, FieldValidators.AlphaNumericSpecial,       "Ext Terminal ID") },
+                    { Bit._045_EXTENDED_CARD_ACCEPTOR_ID_CODE, FieldDescriptor.AsciiVar(2, 25, FieldValidators.AlphaNumericSpecial,          "Ext Acceptor ID") },
+                    { Bit._046_ORIGINAL_CARD_ACCEPTOR_TERMINAL_ID, FieldDescriptor.AsciiFixed(8, FieldValidators.AlphaNumericSpecial,        "Orig TerminalID") },
+                    { Bit._047_ORIGINAL_CARD_ACCEPTOR_ID_CODE, FieldDescriptor.AsciiFixed(15, FieldValidators.AlphaNumericSpecial,           "Orig Card Aptor") },
+                    { Bit._048_DYNAMIC_CURRENCY_CONVERSION_STATUS_CODE, FieldDescriptor.AsciiVar(2, 99, FieldValidators.AlphaNumericSpecial, "DCC Status") },
+                    { Bit._050_CARD_APPLICATION_PROFILE, FieldDescriptor.AsciiVar(2, 35, FieldValidators.AlphaNumericSpecial,                "Card Appli Prof") },
+                    { Bit._051_EXTENDED_AUTHORIZATION_ID_RESPONSE, FieldDescriptor.AsciiVar(1, 8, FieldValidators.AlphaNumericSpecial,       "Ext Auth ID") },
+                    { Bit._052_ADDITIONAL_TOTALS, FieldDescriptor.AsciiVar(6, 990000, FieldValidators.AlphaNumericSpecial,                   "Totals Addition") },
+                    { Bit._053_RECONCILIATION_ID, FieldDescriptor.AsciiVar(2, 35, FieldValidators.AlphaNumericSpecial,                       "Recon ID") },
+                    { Bit._054_CARD_ACCEPTOR_TERMINAL_GROUP_ID, FieldDescriptor.AsciiVar(2, 35, FieldValidators.AlphaNumericSpecial,         "Terminal Group") },
+                    { Bit._055_DESTINATION_CARD_ACCEPTOR_TERMINAL_ID_CODE, FieldDescriptor.AsciiVar(2, 25, FieldValidators.AlphaNumericSpecial, "Dest Terminal") },
+                    { Bit._056_DESTINATION_CARD_ACCEPTOR_ID_CODE, FieldDescriptor.AsciiVar(2, 25, FieldValidators.AlphaNumericSpecial,       "Dest Acceptor") },
+                    { Bit._057_DESTINATION_ACQUIRING_INSTITUTION_ID_CODE, FieldDescriptor.AsciiVar(2, 11, FieldValidators.AlphaNumeric,      "Acq Institution") },
+                    { Bit._058_CORRELATION_ID, FieldDescriptor.AsciiVar(2, 36, FieldValidators.AlphaNumericSpecial,                          "Correlation ID") },
+                    { Bit._059_PAYMENT_TOKEN_IDENTIFIER, FieldDescriptor.AsciiVar(2, 28, FieldValidators.AlphaNumeric,                       "Payment Token") },
+                    { Bit._060_DISTRIBUTED_CONTEXT, FieldDescriptor.AsciiVar(3, 999, FieldValidators.None) },
                 };
             return template;
         }
@@ -135,20 +158,54 @@ namespace OpenIso8583Net
         /// </returns>
         protected override IField CreateField(int field)
         {
-            if (Template.ContainsKey(field))
+            switch (field)
             {
-                return new Field(field, Template[field]);
+                case 25: return new Field127_25();
+                case 49: return new Field127_49();
+                default:
+                    if (Template.ContainsKey(field))
+                        return new Field(field, Template[field]);
+                    break;
             }
-
             throw new UnknownFieldException("127." + field);
         }
+
+        /// <summary>
+        /// ICCData (is an ISO bitmap field)
+        /// </summary>
+        [JsonIgnore]
+        public Field127_25? ICCData
+#pragma warning restore CA1822
+        {
+            get
+            {
+                return (Field127_25)GetField(25);
+            }
+        }
+
+        /// <summary>
+        /// Card Acceptor Additional Data (is an ISO bitmap field)
+        /// </summary>
+#pragma warning disable CA1822 // mark static - don't want to because if the #if...
+        [JsonIgnore]
+        public Field127_49? CardAcceptorAdditionalData
+#pragma warning restore CA1822
+        {
+            get
+            {
+                return (Field127_49)GetField(49);
+            }
+        }
+
+
+
 
         #region Nested type: Bit
 
         /// <summary>
         ///   Human readable constants mapping to field numbers
         /// </summary>
-        public new class Bit
+        public static class Bit
         {
             /// <summary>
             ///   Switch Key
@@ -171,7 +228,7 @@ namespace OpenIso8583Net
             public const int _005_SERVICE_STATION_DATA = 5;
 
             /// <summary>
-            ///   Authorisation profile
+            ///   Authorization profile
             /// </summary>
             public const int _006_AUTH_PROFILE = 6;
 
@@ -241,7 +298,7 @@ namespace OpenIso8583Net
             public const int _019_BANK_DETAILS = 19;
 
             /// <summary>
-            ///   Originator/Authoriser date settlement
+            ///   Originator/Authorizer date settlement
             /// </summary>
             public const int _020_ORIG_AUTH_DATE_SETTLEMENT = 20;
 
@@ -343,17 +400,107 @@ namespace OpenIso8583Net
             /// <summary>
             ///   Transaction Reference
             /// </summary>
-            public const int _40_TRANSACTION_REFERENCE = 40;
+            public const int _040_TRANSACTION_REFERENCE = 40;
 
             /// <summary>
             /// Originating Remote Address
             /// </summary>
-            public const int _41_ORIGINATING_REMOTE_ADDR = 41;
+            public const int _041_ORIGINATING_REMOTE_ADDR = 41;
 
             /// <summary>
             /// Transaction Number
             /// </summary>
-            public const int _42_TRANSACTION_NUMBER = 42;
+            public const int _042_TRANSACTION_NUMBER = 42;
+
+            /// <summary>
+            /// Routing Network ID
+            /// </summary>
+            public const int _043_ROUTING_NETWORK_ID = 43;
+
+            /// <summary>
+            /// Extended Card Acceptor Terminal ID
+            /// </summary>
+            public const int _044_EXTENDED_CARD_ACCEPTOR_TERMINAL_ID = 44;
+
+            /// <summary>
+            /// Extended Card Acceptor ID Code
+            /// </summary>
+            public const int _045_EXTENDED_CARD_ACCEPTOR_ID_CODE = 45;
+
+            /// <summary>
+            /// Original Card Acceptor Terminal ID
+            /// </summary>
+            public const int _046_ORIGINAL_CARD_ACCEPTOR_TERMINAL_ID = 46;
+
+            /// <summary>
+            /// Original Card Acceptor ID Code
+            /// </summary>
+            public const int _047_ORIGINAL_CARD_ACCEPTOR_ID_CODE = 47;
+
+            /// <summary>
+            /// Dynamic Currency Conversion Status Code
+            /// </summary>
+            public const int _048_DYNAMIC_CURRENCY_CONVERSION_STATUS_CODE = 48;
+
+            /// <summary>
+            /// Card Acceptor Additional Data
+            /// </summary>
+            public const int _049_CARD_ACCEPTOR_ADDITIONAL_DATA = 49;
+
+            /// <summary>
+            /// Card Application Profile
+            /// </summary>
+            public const int _050_CARD_APPLICATION_PROFILE = 50;
+
+            /// <summary>
+            /// Extended Authorization ID Response
+            /// </summary>
+            public const int _051_EXTENDED_AUTHORIZATION_ID_RESPONSE = 51;
+
+            /// <summary>
+            /// Additional Totals
+            /// </summary>
+            public const int _052_ADDITIONAL_TOTALS = 52;
+
+            /// <summary>
+            /// Reconciliation ID
+            /// </summary>
+            public const int _053_RECONCILIATION_ID = 53;
+
+            /// <summary>
+            /// Card Acceptor Terminal Group ID
+            /// </summary>
+            public const int _054_CARD_ACCEPTOR_TERMINAL_GROUP_ID = 54;
+
+            /// <summary>
+            /// Destination Card Acceptor Terminal ID Code
+            /// </summary>
+            public const int _055_DESTINATION_CARD_ACCEPTOR_TERMINAL_ID_CODE = 55;
+
+            /// <summary>
+            /// Destination Card Acceptor ID Code
+            /// </summary>
+            public const int _056_DESTINATION_CARD_ACCEPTOR_ID_CODE = 56;
+
+            /// <summary>
+            /// Destination Acquiring Institution ID Code
+            /// </summary>
+            public const int _057_DESTINATION_ACQUIRING_INSTITUTION_ID_CODE = 57;
+
+            /// <summary>
+            /// Correlation ID
+            /// </summary>
+            public const int _058_CORRELATION_ID = 58;
+
+            /// <summary>
+            /// Payment Token Identifier
+            /// </summary>
+            public const int _059_PAYMENT_TOKEN_IDENTIFIER = 59;
+
+            /// <summary>
+            /// Distributed Context
+            /// </summary>
+            public const int _060_DISTRIBUTED_CONTEXT = 60;
         }
 
         #endregion

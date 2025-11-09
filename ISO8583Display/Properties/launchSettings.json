@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Test": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Temp\\R119.ipm\" -max 5"
+    }
+  }
+}

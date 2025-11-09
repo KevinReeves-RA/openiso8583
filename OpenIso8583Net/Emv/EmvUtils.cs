@@ -65,12 +65,15 @@
                     length = stream.ReadByte();
                 }
 
-                byte[] data = null;
+                byte[] data = Array.Empty<byte>();
 
                 if (length > 0)
                 {
                     data = new byte[length];
+#pragma warning disable S2674 // Check the return value of the 'Read' call to see how many bytes were read.
+                    // we're not checking the length read as it can sometimes be shorter, and that seems to be ok...
                     stream.Read(data, 0, length);
+#pragma warning restore S2674 // Check the return value of the 'Read' call to see how many bytes were read.
                 }
 
                 emvTags.Add(tag, data);

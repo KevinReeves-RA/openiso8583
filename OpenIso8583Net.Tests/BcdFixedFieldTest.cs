@@ -22,14 +22,6 @@ namespace OpenIso8583Net.Tests
     [TestClass]
     public class BcdFixedFieldTest
     {
-        #region Public Properties
-
-        /// <summary>
-        ///   Gets or sets the test context which provides information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #endregion
 
         #region Public Methods and Operators
 

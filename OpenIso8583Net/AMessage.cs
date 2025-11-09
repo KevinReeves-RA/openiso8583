@@ -9,6 +9,8 @@
 
 namespace OpenIso8583Net
 {
+    using OpenIso8583Net.Formatter;
+    using OpenIso8583Net.LengthFormatters;
     using System;
     using System.Collections.Generic;
     using System.Text;
@@ -47,7 +49,7 @@ namespace OpenIso8583Net
         {
             Template = template;
             this.fields = new Dictionary<int, IField>();
-            this.bitmap = new Bitmap(template.BitmapFormatter);
+            this.bitmap = new Bitmap(template.BitmapLength, template.BitmapFormatter);
         }
 
         #endregion
@@ -74,16 +76,7 @@ namespace OpenIso8583Net
             }
         }
 
-        /// <summary>
-        ///   Gets the processing code (field 3) of the message
-        /// </summary>
-        public ProcessingCode ProcessingCode
-        {
-            get
-            {
-                return new ProcessingCode(this[3]);
-            }
-        }
+
 
         #endregion
 
@@ -103,7 +96,7 @@ namespace OpenIso8583Net
         /// </summary>
         /// <param name="field"> Field number to get or set </param>
         /// <returns> Value of the field or null if not present </returns>
-        public string this[int field]
+        public string? this[int field]
         {
             get
             {
@@ -141,6 +134,13 @@ namespace OpenIso8583Net
         public virtual string DescribePacking()
         {
             return Template.DescribePacking();
+        }
+
+        public virtual IFieldDescriptor? FieldInfo(int field)
+        {
+            if (Template.ContainsKey(field))
+                return Template[field];
+            return null;
         }
 
         /// <summary>
@@ -187,6 +187,27 @@ namespace OpenIso8583Net
             }
 
             return data;
+        }
+
+        public virtual byte[] ToMsg(Encoding? enc)
+        {
+            // if no encoding, just return the message bytes
+            if (enc == null)
+                return this.ToMsg();
+
+            if (this.Template.MsgTypeFormatter is CodePageFormatter cpp && cpp.Encoding != enc)
+            {
+                this.Template.MsgTypeFormatter = new CodePageFormatter(enc);
+                foreach (var t in Template.Values)
+                {
+                    if (t.Formatter is CodePageFormatter cp)
+                        cp.Encoding = enc;
+                    if (t.LengthFormatter is VariableLengthFormatter var && var.LengthFormatter is CodePageFormatter cpf)
+                        cpf.Encoding = enc;
+                }
+            }
+
+            return ToMsg();
         }
 
         /// <summary>
@@ -255,10 +276,8 @@ namespace OpenIso8583Net
         /// </returns>
         public virtual int Unpack(byte[] msg, int startingOffset)
         {
-            var offset = startingOffset;
-
             // get bitmap
-            offset = this.bitmap.Unpack(msg, offset);
+            var offset = this.bitmap.Unpack(msg, startingOffset);
 
             // get fields
             for (var i = 2; i <= 128; i++)
@@ -316,7 +335,7 @@ namespace OpenIso8583Net
         /// <returns>
         /// Value of the field or null if not present 
         /// </returns>
-        protected string GetFieldValue(int field)
+        protected string? GetFieldValue(int field)
         {
             return this.bitmap[field] ? this.fields[field].Value : null;
         }
@@ -333,7 +352,7 @@ namespace OpenIso8583Net
         /// <remarks>
         /// Don't worry about creating the IField as this method will do so
         /// </remarks>
-        protected void SetFieldValue(int field, string value)
+        protected void SetFieldValue(int field, string? value)
         {
             if (value == null)
             {

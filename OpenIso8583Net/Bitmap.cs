@@ -9,9 +9,8 @@
 
 namespace OpenIso8583Net
 {
-    using System;
-
     using OpenIso8583Net.Formatter;
+    using System;
 
     /// <summary>
     /// Class representing a bitmap in an ISO 8583 message
@@ -24,7 +23,7 @@ namespace OpenIso8583Net
         ///   The _bits.
         /// </summary>
         private readonly bool[] bits;
-
+        private readonly int _bitmapLength = 8;
         #endregion
 
         #region Constructors and Destructors
@@ -35,6 +34,7 @@ namespace OpenIso8583Net
         public Bitmap()
             : this(new BinaryFormatter())
         {
+
         }
 
         /// <summary>
@@ -45,6 +45,13 @@ namespace OpenIso8583Net
         /// </param>
         public Bitmap(IFormatter formatter)
         {
+            Formatter = formatter;
+            this.bits = new bool[128];
+        }
+
+        public Bitmap(int length, IFormatter formatter) : this(new BinaryFormatter())
+        {
+            _bitmapLength = length;
             Formatter = formatter;
             this.bits = new bool[128];
         }
@@ -73,7 +80,7 @@ namespace OpenIso8583Net
         {
             get
             {
-                return this.Formatter.GetPackedLength(this.IsExtendedBitmap ? 32 : 16);
+                return this.Formatter.GetPackedLength(this.IsExtendedBitmap ? (_bitmapLength * 4) : (_bitmapLength * 2));
             }
         }
 
@@ -148,7 +155,7 @@ namespace OpenIso8583Net
         /// </returns>
         public virtual byte[] ToMsg()
         {
-            var lengthOfBitmap = this.IsExtendedBitmap ? 16 : 8;
+            var lengthOfBitmap = this.IsExtendedBitmap ? _bitmapLength * 2 : _bitmapLength;
             var data = new byte[lengthOfBitmap];
 
             for (var i = 0; i < lengthOfBitmap; i++)
@@ -189,21 +196,10 @@ namespace OpenIso8583Net
         {
             // This is a horribly nasty way of doing the bitmaps, but it works
             // I think...
-            var lengthOfBitmap = this.Formatter.GetPackedLength(16);
-            if (this.Formatter is BinaryFormatter)
-            {
-                if (msg[offset] >= 128)
-                {
-                    lengthOfBitmap += 8;
-                }
-            }
-            else
-            {
-                if (msg[offset] >= 0x38)
-                {
-                    lengthOfBitmap += 16;
-                }
-            }
+            var lengthOfBitmap = this.Formatter.GetPackedLength(_bitmapLength * 2);
+            // is the bitmap extended or not? (binary it's the most significant bit, ascii it's > 0x38)
+            if ((msg[offset] >= 128 && this.Formatter is BinaryFormatter) || (msg[offset] >= 0x38 && this.Formatter is not BinaryFormatter))
+                lengthOfBitmap *= 2;
 
             var bitmapData = new byte[lengthOfBitmap];
             Array.Copy(msg, offset, bitmapData, 0, lengthOfBitmap);

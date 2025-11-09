@@ -9,42 +9,24 @@
 
 namespace OpenIso8583Net
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     using OpenIso8583Net.Exceptions;
     using OpenIso8583Net.FieldValidator;
+    using System;
+    using System.Text;
 
     /// <summary>
-    /// Generic Implmentable ISO 8583 Revision 87 class
+    /// Generic Implementable ISO 8583 Revision 87 class
     /// </summary>
     public class Iso8583 : AMessage
     {
-        #region Constants and Fields
-
-        /// <summary>
-        ///   The default template.
-        /// </summary>
-        private static readonly Template DefaultTemplate;
-
-        #endregion
 
         #region Constructors and Destructors
-
-        /// <summary>
-        ///   Initializes static members of the <see cref="Iso8583" /> class.
-        /// </summary>
-        static Iso8583()
-        {
-            DefaultTemplate = GetDefaultIso8583Template();
-        }
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Iso8583" /> class. Creates a new instance of the Iso8583 class
         /// </summary>
         public Iso8583()
-            : this(DefaultTemplate)
+            : this(GetDefaultIso8583Template())
         {
         }
 
@@ -57,42 +39,12 @@ namespace OpenIso8583Net
         public Iso8583(Template template)
             : base(template)
         {
-            this.MessageType = MsgType._0000_INVALID_MSG;
+            this.MessageType = 0;
         }
 
         #endregion
 
         #region Public Properties
-
-        /// <summary>
-        ///   Gets a list of additional amounts for this ISO message
-        /// </summary>
-        public IEnumerable<AdditionalAmount> AdditionalAmounts
-        {
-            get
-            {
-                if (!IsFieldSet(54))
-                {
-                    return null;
-                }
-
-                var addAmounts = new List<AdditionalAmount>();
-                var amounts = GetField(54).Value;
-
-                if (amounts.Length % 20 != 0)
-                {
-                    throw new Exception("AdditionalAmounts incorrect length");
-                }
-
-                for (var i = 0; i < amounts.Length; i += 20)
-                {
-                    var amount = amounts.Substring(i, 20);
-                    addAmounts.Add(new AdditionalAmount(amount));
-                }
-
-                return addAmounts;
-            }
-        }
 
         /// <summary>
         ///   Gets or sets the message type
@@ -110,32 +62,9 @@ namespace OpenIso8583Net
             }
         }
 
-        /// <summary>
-        ///   Gets or sets the transaction amount for the message
-        /// </summary>
-        public long TransactionAmount
-        {
-            get
-            {
-                return long.Parse(this[4]);
-            }
 
-            set
-            {
-                this[4] = value.ToString().PadLeft(12, '0');
-            }
-        }
 
-        /// <summary>
-        ///   Gets the transmission date time
-        /// </summary>
-        public TransmissionDateTime TransmissionDateTime
-        {
-            get
-            {
-                return new TransmissionDateTime(this);
-            }
-        }
+
 
         #endregion
 
@@ -158,7 +87,6 @@ namespace OpenIso8583Net
             var newMsgType = Template.MsgTypeFormatter.GetBytes(msgTypeString);
             var msgTypeLen = newMsgType.Length;
 
-            // Array.Copy(IsoConvert.FromIntToMsgTypeData(MessageType), 0, data, 0, 4);
             Array.Copy(newMsgType, 0, data, 0, newMsgType.Length);
             var baseMsg = base.ToMsg();
             Array.Copy(baseMsg, 0, data, msgTypeLen, baseMsg.Length);
@@ -196,7 +124,7 @@ namespace OpenIso8583Net
         /// </returns>
         public override int Unpack(byte[] msg, int startingOffset)
         {
-            // get mtid
+            // get message type id
             var mtidLength = this.Template.MsgTypeFormatter.GetPackedLength(4);
             var buffer = new byte[mtidLength];
             var offset = startingOffset;
@@ -205,6 +133,14 @@ namespace OpenIso8583Net
             this.MessageType = IsoConvert.FromMsgTypeToInt(msgTypeString);
             offset += mtidLength;
             return base.Unpack(msg, offset);
+        }
+
+        /// <summary>
+        /// Unpacks the message from a byte array, starting at offset 0
+        /// </summary>
+        public int Unpack(byte[] msg)
+        {
+            return this.Unpack(msg, 0);
         }
 
         #endregion
@@ -221,87 +157,80 @@ namespace OpenIso8583Net
         {
             var template = new Template
                 {
-                    { Bit._002_PAN, FieldDescriptor.AsciiVar(2, 19, FieldValidators.N) },
-                    { Bit._003_PROC_CODE, FieldDescriptor.AsciiFixed(6, FieldValidators.N) },
-                    { Bit._004_TRAN_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N) },
-                    { Bit._005_SETTLE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N) },
-                    { Bit._007_TRAN_DATE_TIME, FieldDescriptor.AsciiFixed(10, FieldValidators.N) },
-                    { Bit._009_CONVERSION_RATE_SETTLEMENT, FieldDescriptor.AsciiFixed(8, FieldValidators.N) },
-                    { Bit._011_SYS_TRACE_AUDIT_NUM, FieldDescriptor.AsciiFixed(6, FieldValidators.N) },
-                    { Bit._012_LOCAL_TRAN_TIME, FieldDescriptor.AsciiFixed(6, FieldValidators.N) },
-                    { Bit._013_LOCAL_TRAN_DATE, FieldDescriptor.AsciiFixed(4, FieldValidators.N) },
-                    { Bit._014_EXPIRATION_DATE, FieldDescriptor.AsciiFixed(4, FieldValidators.N) },
-                    { Bit._015_SELLTLEMENT_DATE, FieldDescriptor.AsciiFixed(4, FieldValidators.N) },
-                    { Bit._016_CONVERSION_DATE, FieldDescriptor.AsciiFixed(4, FieldValidators.N) },
-                    { Bit._018_MERCHANT_TYPE, FieldDescriptor.AsciiFixed(4, FieldValidators.N) },
-                    { Bit._022_POS_ENTRY_MODE, FieldDescriptor.AsciiFixed(3, FieldValidators.N) },
-                    { Bit._023_CARD_SEQUENCE_NUM, FieldDescriptor.AsciiFixed(3, FieldValidators.N) },
-                    { Bit._025_POS_CONDITION_CODE, FieldDescriptor.AsciiFixed(2, FieldValidators.N) },
-                    { Bit._026_POS_PIN_CAPTURE_CODE, FieldDescriptor.AsciiFixed(2, FieldValidators.N) },
-                    { Bit._027_AUTH_ID_RSP, FieldDescriptor.AsciiFixed(1, FieldValidators.N) },
-                    { Bit._028_TRAN_FEE_AMOUNT, FieldDescriptor.AsciiFixed(9, FieldValidators.Rev87AmountValidator) },
-                    {
-                        Bit._029_SETTLEMENT_FEE_AMOUNT, FieldDescriptor.AsciiFixed(9, FieldValidators.Rev87AmountValidator)
-                        },
-                    { Bit._030_TRAN_PROC_FEE_AMOUNT, FieldDescriptor.AsciiFixed(9, FieldValidators.Rev87AmountValidator) },
-                    {
-                        Bit._031_SETTLEMENT_PROC_FEE_AMOUNT,
-                        FieldDescriptor.AsciiFixed(9, FieldValidators.Rev87AmountValidator)
-                        },
-                    { Bit._032_ACQUIRING_INST_ID_CODE, FieldDescriptor.AsciiVar(2, 11, FieldValidators.N) },
-                    { Bit._033_FORWARDING_INT_ID_CODE, FieldDescriptor.AsciiVar(2, 11, FieldValidators.N) },
-                    { Bit._035_TRACK_2_DATA, FieldDescriptor.AsciiVar(2, 37, FieldValidators.Track2) },
-                    { Bit._037_RETRIEVAL_REF_NUM, FieldDescriptor.AsciiFixed(12, FieldValidators.An) },
-                    { Bit._038_AUTH_ID_RESPONSE, FieldDescriptor.AsciiFixed(6, FieldValidators.An) },
-                    { Bit._039_RESPONSE_CODE, FieldDescriptor.AsciiFixed(2, FieldValidators.An) },
-                    { Bit._040_SERVICE_RESTRICTION_CODE, FieldDescriptor.AsciiFixed(3, FieldValidators.N) },
-                    { Bit._041_CARD_ACCEPTOR_TERMINAL_ID, FieldDescriptor.AsciiFixed(8, FieldValidators.Ans) },
-                    { Bit._042_CARD_ACCEPTOR_ID_CODE, FieldDescriptor.AsciiFixed(15, FieldValidators.Ans) },
-                    { Bit._043_CARD_ACCEPTOR_NAME_LOCATION, FieldDescriptor.AsciiFixed(40, FieldValidators.Ans) },
-                    { Bit._044_ADDITIONAL_RESPONSE_DATA, FieldDescriptor.AsciiVar(2, 25, FieldValidators.Ans) },
-                    { Bit._045_TRACK_1_DATA, FieldDescriptor.AsciiVar(2, 76, FieldValidators.Ans) },
-                    { Bit._048_ADDITIONAL_DATA, FieldDescriptor.AsciiVar(3, 999, FieldValidators.Ans) },
-                    { Bit._049_TRAN_CURRENCY_CODE, FieldDescriptor.AsciiFixed(3, FieldValidators.AorN) },
-                    { Bit._050_SETTLEMENT_CURRENCY_CODE, FieldDescriptor.AsciiFixed(3, FieldValidators.AorN) },
-                    { Bit._052_PIN_DATA, FieldDescriptor.BinaryFixed(8) },
-                    { Bit._053_SECURITY_RELATED_CONTROL_INFORMATION, FieldDescriptor.BinaryFixed(48) },
-                    { Bit._054_ADDITIONAL_AMOUNTS, FieldDescriptor.AsciiVar(3, 120, FieldValidators.An) },
-                    { Bit._056_MESSAGE_REASON_CODE, FieldDescriptor.AsciiVar(3, 4, FieldValidators.N) },
-                    { Bit._057_AUTHORISATION_LIFE_CYCLE, FieldDescriptor.AsciiVar(3, 3, FieldValidators.N) },
-                    { Bit._058_AUTHORISING_AGENT_INSTITUTION, FieldDescriptor.AsciiVar(3, 11, FieldValidators.Anp) },
-                    { Bit._066_SETTLEMENT_CODE, FieldDescriptor.AsciiFixed(1, FieldValidators.N) },
-                    { Bit._067_EXTENDED_PAYMENT_CODE, FieldDescriptor.AsciiFixed(2, FieldValidators.N) },
-                    { Bit._070_NETWORK_MANAGEMENT_INFORMATION_CODE, FieldDescriptor.AsciiFixed(3, FieldValidators.N) },
-                    { Bit._073_DATE_ACTION, FieldDescriptor.AsciiFixed(6, FieldValidators.N) },
-                    { Bit._074_CREDITS_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N) },
-                    { Bit._075_CREDITS_REVERSAL_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N) },
-                    { Bit._076_DEBITS_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N) },
-                    { Bit._077_DEBITS_REVERSAL_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N) },
-                    { Bit._078_TRANSFER_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N) },
-                    { Bit._079_TRANSFER_REVERSAL_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N) },
-                    { Bit._080_INQUIRIES_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N) },
-                    { Bit._081_AUTHORISATIONS_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N) },
-                    { Bit._082_CREDITS_PROCESSING_FEE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N) },
-                    { Bit._083_CREDITS_TRANSACTION_FEE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N) },
-                    { Bit._084_DEBITS_PROCESSING_FEE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N) },
-                    { Bit._085_DEBITS_TRANSACTION_FEE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N) },
-                    { Bit._086_CREDITS_AMOUNT, FieldDescriptor.AsciiFixed(16, FieldValidators.N) },
-                    { Bit._087_CREDITS_REVERSAL_AMOUNT, FieldDescriptor.AsciiFixed(16, FieldValidators.N) },
-                    { Bit._088_DEBITS_AMOUNT, FieldDescriptor.AsciiFixed(16, FieldValidators.N) },
-                    { Bit._089_DEBITS_REVERSAL_AMOUNT, FieldDescriptor.AsciiFixed(16, FieldValidators.N) },
-                    { Bit._090_ORIGINAL_DATA_ELEMENTS, FieldDescriptor.AsciiFixed(42, FieldValidators.N) },
-                    { Bit._091_FILE_UPDATE_CODE, FieldDescriptor.AsciiFixed(1, FieldValidators.An) },
-                    { Bit._095_REPLACEMENT_AMOUNTS, FieldDescriptor.AsciiFixed(42, FieldValidators.Ans) },
-                    {
-                        Bit._097_AMOUNT_NET_SETTLEMENT, FieldDescriptor.AsciiFixed(17, FieldValidators.Rev87AmountValidator)
-                        },
-                    { Bit._098_PAYEE, FieldDescriptor.AsciiFixed(25, FieldValidators.Ans) },
-                    { Bit._100_RECEIVING_INST_ID_CODE, FieldDescriptor.AsciiVar(2, 11, FieldValidators.N) },
-                    { Bit._101_FILE_NAME, FieldDescriptor.AsciiVar(2, 17, FieldValidators.Ans) },
-                    { Bit._102_ACCOUNT_ID_1, FieldDescriptor.AsciiVar(2, 28, FieldValidators.Ans) },
-                    { Bit._103_ACCOUNT_ID_2, FieldDescriptor.AsciiVar(2, 28, FieldValidators.Ans) },
-                    { Bit._118_PAYMENTS_NUMBER, FieldDescriptor.AsciiVar(3, 30, FieldValidators.N) },
-                    { Bit._119_PAYMENTS_REVERSAL_NUMBER, FieldDescriptor.AsciiVar(3, 10, FieldValidators.N) },
+                    { Bit._002_PAN, FieldDescriptor.AsciiVar(2, 19, FieldValidators.N,                     "PAN") },
+                    { Bit._003_PROC_CODE, FieldDescriptor.AsciiFixed(6, FieldValidators.N,                 "Processing Code") },
+                    { Bit._004_TRAN_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N,              "Txn Amount") },
+                    { Bit._005_SETTLE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N,            "Settle Amount") },
+                    { Bit._007_TRAN_DATE_TIME, FieldDescriptor.AsciiFixed(10, FieldValidators.N,           "Txn Date") },
+                    { Bit._009_CONVERSION_RATE_SETTLEMENT, FieldDescriptor.AsciiFixed(8, FieldValidators.N,"DCC Rate Settle") },
+                    { Bit._011_SYS_TRACE_AUDIT_NUM, FieldDescriptor.AsciiFixed(6, FieldValidators.N,       "Trace Audit #") },
+                    { Bit._012_LOCAL_TRAN_TIME, FieldDescriptor.AsciiFixed(6, FieldValidators.N,           "Local Txn Time") },
+                    { Bit._013_LOCAL_TRAN_DATE, FieldDescriptor.AsciiFixed(4, FieldValidators.N,           "Local Txn Date") },
+                    { Bit._014_EXPIRATION_DATE, FieldDescriptor.AsciiFixed(4, FieldValidators.N,           "Card Exp. Date") },
+                    { Bit._015_SELLTLEMENT_DATE, FieldDescriptor.AsciiFixed(4, FieldValidators.N,          "Settle Date") },
+                    { Bit._016_CONVERSION_DATE, FieldDescriptor.AsciiFixed(4, FieldValidators.N,           "DCC Convert Dte") },
+                    { Bit._018_MERCHANT_TYPE, FieldDescriptor.AsciiFixed(4, FieldValidators.N,             "MCC") },
+                    { Bit._022_POS_ENTRY_MODE, FieldDescriptor.AsciiFixed(3, FieldValidators.N,            "POS Entry Mode") },
+                    { Bit._023_CARD_SEQUENCE_NUM, FieldDescriptor.AsciiFixed(3, FieldValidators.N,         "Card Seq Num") },
+                    { Bit._025_POS_CONDITION_CODE, FieldDescriptor.AsciiFixed(2, FieldValidators.N,        "POS Condition") },
+                    { Bit._026_POS_PIN_CAPTURE_CODE, FieldDescriptor.AsciiFixed(2, FieldValidators.N,      "PIN Capture") },
+                    { Bit._027_AUTH_ID_RSP, FieldDescriptor.AsciiFixed(1, FieldValidators.N,               "Auth ID Resp") },
+                    { Bit._028_TRAN_FEE_AMOUNT, FieldDescriptor.AsciiFixed(9, FieldValidators.Rev87AmountValidator, "Fee Txn") },
+                    { Bit._029_SETTLEMENT_FEE_AMOUNT, FieldDescriptor.AsciiFixed(9, FieldValidators.Rev87AmountValidator, "Fee Settle") },
+                    { Bit._030_TRAN_PROC_FEE_AMOUNT, FieldDescriptor.AsciiFixed(9, FieldValidators.Rev87AmountValidator, "Fee Process") },
+                    { Bit._031_SETTLEMENT_PROC_FEE_AMOUNT, FieldDescriptor.AsciiFixed(9, FieldValidators.Rev87AmountValidator,"Fee Settle Proc") },
+                    { Bit._032_ACQUIRING_INST_ID_CODE, FieldDescriptor.AsciiVar(2, 11, FieldValidators.N,  "Acquirer ID") },
+                    { Bit._033_FORWARDING_INT_ID_CODE, FieldDescriptor.AsciiVar(2, 11, FieldValidators.N,  "Forwarding ID") },
+                    { Bit._035_TRACK_2_DATA, FieldDescriptor.AsciiVar(2, 37, FieldValidators.Track2,       "Track 2") },
+                    { Bit._037_RETRIEVAL_REF_NUM, FieldDescriptor.AsciiFixed(12, FieldValidators.An,       "Ret Ref No") },
+                    { Bit._038_AUTH_ID_RESPONSE, FieldDescriptor.AsciiFixed(6, FieldValidators.An,         "Approval Code") },
+                    { Bit._039_RESPONSE_CODE, FieldDescriptor.AsciiFixed(2, FieldValidators.An,            "Response Code") },
+                    { Bit._040_SERVICE_RESTRICTION_CODE, FieldDescriptor.AsciiFixed(3, FieldValidators.N,  "Svc Restriction") },
+                    { Bit._041_CARD_ACCEPTOR_TERMINAL_ID, FieldDescriptor.AsciiFixed(8,FieldValidators.Ans,"Terminal ID") },
+                    { Bit._042_CARD_ACCEPTOR_ID_CODE, FieldDescriptor.AsciiFixed(15, FieldValidators.Ans,  "Card Acceptor") },
+                    { Bit._043_CARD_ACCEPTOR_NAME_LOCATION, FieldDescriptor.AsciiFixed(40, FieldValidators.Ans, "Merch Name") },
+                    { Bit._044_ADDITIONAL_RESPONSE_DATA, FieldDescriptor.AsciiVar(2, 25, FieldValidators.Ans, "Response Data") },
+                    { Bit._045_TRACK_1_DATA, FieldDescriptor.AsciiVar(2, 76, FieldValidators.Ans,          "Track 1") },
+                    { Bit._048_ADDITIONAL_DATA, FieldDescriptor.AsciiVar(3, 999, FieldValidators.Ans,      "Add. Data") },
+                    { Bit._049_TRAN_CURRENCY_CODE, FieldDescriptor.AsciiFixed(3, FieldValidators.AorN,     "Txn Currency Code") },
+                    { Bit._050_SETTLEMENT_CURRENCY_CODE, FieldDescriptor.AsciiFixed(3, FieldValidators.AorN, "Settle Currency") },
+                    { Bit._052_PIN_DATA, FieldDescriptor.BinaryFixed(8,                                    "PIN Data") },
+                    { Bit._053_SECURITY_RELATED_CONTROL_INFORMATION, FieldDescriptor.BinaryFixed(48,       "Security Ctrl") },
+                    { Bit._054_ADDITIONAL_AMOUNTS, FieldDescriptor.AsciiVar(3, 120, FieldValidators.An,    "Add. Amounts") },
+                    { Bit._056_MESSAGE_REASON_CODE, FieldDescriptor.AsciiVar(3, 4, FieldValidators.N,      "Reason Code") },
+                    { Bit._057_AUTHORISATION_LIFE_CYCLE, FieldDescriptor.AsciiVar(3, 3, FieldValidators.N, "Auth Life Cycle") },
+                    { Bit._058_AUTHORISING_AGENT_INSTITUTION, FieldDescriptor.AsciiVar(3, 11, FieldValidators.Anp, "Auth Agent") },
+                    { Bit._066_SETTLEMENT_CODE, FieldDescriptor.AsciiFixed(1, FieldValidators.N,           "Settle Code") },
+                    { Bit._067_EXTENDED_PAYMENT_CODE, FieldDescriptor.AsciiFixed(2, FieldValidators.N,     "Ext. Pay Code") },
+                    { Bit._070_NETWORK_MANAGEMENT_INFORMATION_CODE, FieldDescriptor.AsciiFixed(3, FieldValidators.N, "Network Mgmt") },
+                    { Bit._073_DATE_ACTION, FieldDescriptor.AsciiFixed(6, FieldValidators.N,               "Action Date") },
+                    { Bit._074_CREDITS_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N,           "# Credits") },
+                    { Bit._075_CREDITS_REVERSAL_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N,  "# Reversals") },
+                    { Bit._076_DEBITS_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N,            "# Debits") },
+                    { Bit._077_DEBITS_REVERSAL_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N,   "# Debit Rev.") },
+                    { Bit._078_TRANSFER_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N,          "# Transfers") },
+                    { Bit._079_TRANSFER_REVERSAL_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N, "# Transfer Rev") },
+                    { Bit._080_INQUIRIES_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N,         "# Inquiry") },
+                    { Bit._081_AUTHORISATIONS_NUMBER, FieldDescriptor.AsciiFixed(10, FieldValidators.N,    "# Auths") },
+                    { Bit._082_CREDITS_PROCESSING_FEE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N, "Fee Credit Proc") },
+                    { Bit._083_CREDITS_TRANSACTION_FEE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N,"Fee Credit Txns") },
+                    { Bit._084_DEBITS_PROCESSING_FEE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N,  "Fee Debit Proc") },
+                    { Bit._085_DEBITS_TRANSACTION_FEE_AMOUNT, FieldDescriptor.AsciiFixed(12, FieldValidators.N, "Fee Debit Txns") },
+                    { Bit._086_CREDITS_AMOUNT, FieldDescriptor.AsciiFixed(16, FieldValidators.N,           "# Credits") },
+                    { Bit._087_CREDITS_REVERSAL_AMOUNT, FieldDescriptor.AsciiFixed(16, FieldValidators.N,  "# Credit Rev.") },
+                    { Bit._088_DEBITS_AMOUNT, FieldDescriptor.AsciiFixed(16, FieldValidators.N,            "Amount Debits") },
+                    { Bit._089_DEBITS_REVERSAL_AMOUNT, FieldDescriptor.AsciiFixed(16, FieldValidators.N,   "Amount Deb Rev") },
+                    { Bit._090_ORIGINAL_DATA_ELEMENTS, FieldDescriptor.AsciiFixed(42, FieldValidators.N,   "Original Data") },
+                    { Bit._091_FILE_UPDATE_CODE, FieldDescriptor.AsciiFixed(1, FieldValidators.An,         "File Update") },
+                    { Bit._095_REPLACEMENT_AMOUNTS, FieldDescriptor.AsciiFixed(42, FieldValidators.Ans,    "Amounts Replace") },
+                    { Bit._097_AMOUNT_NET_SETTLEMENT, FieldDescriptor.AsciiFixed(17, FieldValidators.Rev87AmountValidator, "Amount Net Set.") },
+                    { Bit._098_PAYEE, FieldDescriptor.AsciiFixed(25, FieldValidators.Ans,                  "Payee") },
+                    { Bit._100_RECEIVING_INST_ID_CODE, FieldDescriptor.AsciiVar(2, 11, FieldValidators.N,  "Rcv Inst. Code") },
+                    { Bit._101_FILE_NAME, FieldDescriptor.AsciiVar(2, 17, FieldValidators.Ans,             "File Name") },
+                    { Bit._102_ACCOUNT_ID_1, FieldDescriptor.AsciiVar(2, 28, FieldValidators.Ans,          "Acct ID 1") },
+                    { Bit._103_ACCOUNT_ID_2, FieldDescriptor.AsciiVar(2, 28, FieldValidators.Ans,          "Acct ID 2") },
+                    { Bit._118_PAYMENTS_NUMBER, FieldDescriptor.AsciiVar(3, 30, FieldValidators.N,         "# Payments") },
+                    { Bit._119_PAYMENTS_REVERSAL_NUMBER, FieldDescriptor.AsciiVar(3, 10, FieldValidators.N,"# Payment Rev.") },
                 };
 
             return template;
@@ -331,7 +260,7 @@ namespace OpenIso8583Net
         /// <summary>
         /// Human readable constants mapping to field numbers
         /// </summary>
-        public class Bit
+        public static class Bit
         {
             #region Constants and Fields
 
@@ -708,212 +637,6 @@ namespace OpenIso8583Net
             #endregion
         }
 
-        /// <summary>
-        /// Human readable constants mapping to message types
-        /// </summary>
-        public class MsgType
-        {
-            #region Constants and Fields
 
-            /// <summary>
-            ///   Invalid Message Type
-            /// </summary>
-            public const int _0000_INVALID_MSG = 0x000;
-
-            /// <summary>
-            ///   Auth Request
-            /// </summary>
-            public const int _0100_AUTH_REQ = 0x100;
-
-            /// <summary>
-            ///   Auth Response
-            /// </summary>
-            public const int _0110_AUTH_REQ_RSP = 0x110;
-
-            /// <summary>
-            ///   Auth Advice
-            /// </summary>
-            public const int _0120_AUTH_ADV = 0x120;
-
-            /// <summary>
-            ///   Auth Advice Response
-            /// </summary>
-            public const int _0130_AUTH_ADV_RSP = 0x130;
-
-            /// <summary>
-            ///   Transaction Request
-            /// </summary>
-            public const int _0200_TRAN_REQ = 0x200;
-
-            /// <summary>
-            ///   Transaction Request Repeat
-            /// </summary>
-            public const int _0201_TRAN_REQ_REP = 0x201;
-
-            /// <summary>
-            ///   Transaction Completion
-            /// </summary>
-            public const int _0202_TRAN_CMP = 0x202;
-
-            /// <summary>
-            ///   Transaction Completion Repeat
-            /// </summary>
-            public const int _0203_TRAN_CMP_REP = 0x203;
-
-            /// <summary>
-            ///   Transaction Response
-            /// </summary>
-            public const int _0210_TRAN_REQ_RSP = 0x210;
-
-            /// <summary>
-            ///   Transaction Completion Response
-            /// </summary>
-            public const int _0212_TRAN_CMP_RSP = 0x212;
-
-            /// <summary>
-            ///   Transaction Advice
-            /// </summary>
-            public const int _0220_TRAN_ADV = 0x220;
-
-            /// <summary>
-            ///   Transaction Advice Repeat
-            /// </summary>
-            public const int _0221_TRAN_ADV_REP = 0x221;
-
-            /// <summary>
-            ///   Transaction Advice Response
-            /// </summary>
-            public const int _0230_TRAN_ADV_RSP = 0x230;
-
-            /// <summary>
-            ///   Acquirer file update request
-            /// </summary>
-            public const int _0300_ACQUIRER_FILE_UPDATE_REQ = 0x300;
-
-            /// <summary>
-            ///   Acquirer file update response
-            /// </summary>
-            public const int _0310_ACQUIRER_FILE_UPDATE_RSP = 0x310;
-
-            /// <summary>
-            ///   Acquirer File Update Advice
-            /// </summary>
-            public const int _0320_ACQUIRER_FILE_UPDATE_ADV = 0x320;
-
-            /// <summary>
-            ///   Issuer File Update Advice
-            /// </summary>
-            public const int _0322_ISSUER_FILE_UPDATE_ADV = 0x322;
-
-            /// <summary>
-            ///   Acquirer File Update Advice Response
-            /// </summary>
-            public const int _0330_ACQUIRER_FILE_UPDATE_ADV_RSP = 0x330;
-
-            /// <summary>
-            ///   Issuer File Update Advice Response
-            /// </summary>
-            public const int _0332_ISSUER_FILE_UPDATE_ADV_RSP = 0x332;
-
-            /// <summary>
-            ///   Acquirer Reversal Request
-            /// </summary>
-            public const int _0400_ACQUIRER_REV_REQ = 0x400;
-
-            /// <summary>
-            ///   Acquirer Reversal Request Response
-            /// </summary>
-            public const int _0410_ACQUIRER_REV_REQ_RSP = 0x410;
-
-            /// <summary>
-            ///   Acquirer Reversal Advice
-            /// </summary>
-            public const int _0420_ACQUIRER_REV_ADV = 0x420;
-
-            /// <summary>
-            ///   Acquirer Reversal Advice Repeat
-            /// </summary>
-            public const int _0421_ACQUIRER_REV_ADV_REP = 0x421;
-
-            /// <summary>
-            ///   Acquirer Reversal Advice Response
-            /// </summary>
-            public const int _0430_ACQUIRER_REV_ADV_RSP = 0x430;
-
-            /// <summary>
-            ///   Acquirer Recon Request
-            /// </summary>
-            public const int _0500_ACQUIRER_RECONCILE_REQ = 0x500;
-
-            /// <summary>
-            ///   Acquirer Recon Request Response
-            /// </summary>
-            public const int _0510_ACQUIRER_RECONCILE_REQ_RSP = 0x510;
-
-            /// <summary>
-            ///   Acquirer Recon Advice
-            /// </summary>
-            public const int _0520_ACQUIRER_RECONCILE_ADV = 0x520;
-
-            /// <summary>
-            ///   Acquirer Recon Advice Repeat
-            /// </summary>
-            public const int _0521_ACQUIRER_RECONCILE_ADV_REP = 0x521;
-
-            /// <summary>
-            ///   Acquirer Recon Advice Response
-            /// </summary>
-            public const int _0530_ACQUIRER_RECONCILE_ADV_RSP = 0x530;
-
-            /// <summary>
-            ///   Administrative Request
-            /// </summary>
-            public const int _0600_ADMIN_REQ = 0x600;
-
-            /// <summary>
-            ///   Administrative Request
-            /// </summary>
-            public const int _0601_ADMIN_REQ_REP = 0x601;
-
-            /// <summary>
-            ///   Administrative Request Response
-            /// </summary>
-            public const int _0610_ADMIN_REQ_RSP = 0x610;
-
-            /// <summary>
-            ///   Network Management Request
-            /// </summary>
-            public const int _0800_NWRK_MNG_REQ = 0x800;
-
-            /// <summary>
-            ///   Network Management Request Repeat
-            /// </summary>
-            public const int _0801_NWRK_MNG_REQ_REP = 0x801;
-
-            /// <summary>
-            ///   Network Management Response
-            /// </summary>
-            public const int _0810_NWRK_MNG_REQ_RSP = 0x810;
-
-            #endregion
-
-            #region Public Methods and Operators
-
-            /// <summary>
-            /// Gets the response message type for the given message type. E.g. 0220 -&gt; 0230, 0421 -&gt; 0430
-            /// </summary>
-            /// <param name="msgType">
-            /// Request Message Type 
-            /// </param>
-            /// <returns>
-            /// Response Message Type 
-            /// </returns>
-            public static int GetResponse(int msgType)
-            {
-                return msgType - (msgType % 2) + 0x10;
-            }
-
-            #endregion
-        }
     }
 }

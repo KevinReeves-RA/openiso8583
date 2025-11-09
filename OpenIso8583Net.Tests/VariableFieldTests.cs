@@ -9,14 +9,10 @@
 
 namespace OpenIso8583Net.Tests
 {
-    using System.Text;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using OpenIso8583Net.Exceptions;
     using OpenIso8583Net.FieldValidator;
-    using OpenIso8583Net.Formatter;
-    using OpenIso8583Net.LengthFormatters;
+    using System.Text;
 
     /// <summary>
     /// Variable Field Tests
@@ -24,14 +20,6 @@ namespace OpenIso8583Net.Tests
     [TestClass]
     public class VariableFieldTests
     {
-        #region Public Properties
-
-        /// <summary>
-        ///  Gets or sets the test context which provides information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #endregion
 
         #region Public Methods and Operators
 
@@ -41,7 +29,7 @@ namespace OpenIso8583Net.Tests
         [TestMethod]
         public void PackedLength()
         {
-            var field = Field.AsciiVar(2, 2, 19, FieldValidators.N);
+            var field = new Field(2, FieldDescriptor.AsciiVar(2, 19, FieldValidators.N));
             field.Value = "58889212344567886";
             Assert.AreEqual(19, field.PackedLength);
         }

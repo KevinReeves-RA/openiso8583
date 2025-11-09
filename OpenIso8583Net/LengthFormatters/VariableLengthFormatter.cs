@@ -1,5 +1,5 @@
-﻿using System;
-using OpenIso8583Net.Formatter;
+﻿using OpenIso8583Net.Formatter;
+using System;
 
 namespace OpenIso8583Net.LengthFormatters
 {
@@ -8,8 +8,6 @@ namespace OpenIso8583Net.LengthFormatters
     /// </summary>
     public class VariableLengthFormatter : ILengthFormatter
     {
-        private readonly IFormatter _lengthFormatter;
-        private readonly int _lengthIndicator;
         private readonly int _maxLength;
 
         /// <summary>
@@ -20,21 +18,12 @@ namespace OpenIso8583Net.LengthFormatters
         /// <param name = "lengthFormatter">The field formatter used to pack the field</param>
         public VariableLengthFormatter(int lengthIndicator, int maxLength, IFormatter lengthFormatter)
         {
-            _lengthIndicator = lengthIndicator;
             _maxLength = maxLength;
-            _lengthFormatter = lengthFormatter;
-            LengthOfLengthIndicator = _lengthFormatter.GetPackedLength(_lengthIndicator);
+            LengthFormatter = lengthFormatter;
+            LengthOfLengthIndicator = LengthFormatter.GetPackedLength(lengthIndicator);
         }
 
-        /// <summary>
-        ///   Variable length field formatter that uses ASCII packing for the length indicator
-        /// </summary>
-        /// <param name = "lengthIndicator">Length of the length indicator</param>
-        /// <param name = "maxLength">Maximum length of the field</param>
-        public VariableLengthFormatter(int lengthIndicator, int maxLength)
-            : this(lengthIndicator, maxLength, new AsciiFormatter())
-        {
-        }
+        public IFormatter LengthFormatter { get; set; }
 
         #region ILengthFormatter Members
 
@@ -74,7 +63,9 @@ namespace OpenIso8583Net.LengthFormatters
             var len = LengthOfLengthIndicator;
             var lenData = new byte[len];
             Array.Copy(msg, offset, lenData, 0, len);
-            var lenStr = _lengthFormatter.GetString(lenData);
+            var lenStr = LengthFormatter.GetString(lenData);
+            if (lenData[0] == 0 && lenData[1] == 0)
+                return 0;
             return int.Parse(lenStr);
         }
 
@@ -88,7 +79,7 @@ namespace OpenIso8583Net.LengthFormatters
         public int Pack(byte[] msg, int length, int offset)
         {
             var lengthStr = length.ToString().PadLeft(LengthOfLengthIndicator, '0');
-            var header = _lengthFormatter.GetBytes(lengthStr);
+            var header = LengthFormatter.GetBytes(lengthStr);
             Array.Copy(header, 0, msg, offset, LengthOfLengthIndicator);
             return offset + LengthOfLengthIndicator;
         }

@@ -5,8 +5,12 @@ namespace OpenIso8583Net.Exceptions
     /// <summary>
     ///   Exception detailing a field length
     /// </summary>
-    public class FieldLengthException : ApplicationException
+    [Serializable]
+    public class FieldLengthException : Exception
     {
+        protected FieldLengthException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext) { }
+
         /// <summary>
         ///   Create a new instance of the FieldLengthException class
         /// </summary>
@@ -22,5 +26,7 @@ namespace OpenIso8583Net.Exceptions
         ///   Field number that this exception applies to
         /// </summary>
         public int FieldNumber { get; private set; }
+
+
     }
 }

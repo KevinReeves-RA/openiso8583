@@ -1,15 +1,30 @@
 ﻿using OpenIso8583Net.Exceptions;
 using OpenIso8583Net.FieldValidator;
+using OpenIso8583Net.Formatter;
 using OpenIso8583Net.LengthFormatters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
+using IFormatter = OpenIso8583Net.Formatter.IFormatter;
 
 namespace OpenIso8583Net.TermAppIso
 {
+    [Serializable]
     public class AdditionalData : Dictionary<AdditionalData.Field, string>, IField
     {
+        public AdditionalData(IFormatter formatter)
+        {
+            lenFormatter = new VariableLengthFormatter(4, 9999, formatter);
+        }
+
+        protected AdditionalData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
+            lenFormatter = new VariableLengthFormatter(4, 9999, Formatters.Ascii);
+        }
+
         public enum Field
         {
             PosData = 1, AuthProfile = 2, CardVerificationData = 3, ExtendedTranType = 4, AddNodeData = 5, InquiryRspData = 6,
@@ -18,9 +33,9 @@ namespace OpenIso8583Net.TermAppIso
             StructuredData = 16
         }
 
-        private static VariableLengthFormatter lenFormatter = new VariableLengthFormatter(4, 9999);
+        private readonly VariableLengthFormatter lenFormatter;
 
-        private IFieldDescriptor GetFieldDescriptor(Field field)
+        private static IFieldDescriptor GetFieldDescriptor(Field field)
         {
             switch (field)
             {
@@ -76,7 +91,7 @@ namespace OpenIso8583Net.TermAppIso
             return b;
         }
 
-        private List<Field> GetFieldsFrom(byte[] bitmap)
+        private static List<Field> GetFieldsFrom(byte[] bitmap)
         {
             int bit = (bitmap[0] & 0xff) * 256 + (bitmap[1] & 0xff);
             var fields = new List<Field>();
@@ -121,7 +136,7 @@ namespace OpenIso8583Net.TermAppIso
         {
             get
             {
-                return null;
+                return string.Empty;
             }
             set
             {
@@ -179,7 +194,7 @@ namespace OpenIso8583Net.TermAppIso
                 sb.Append(fieldNr.PadLeft(3, '0'));
                 sb.Append(" [");
                 sb.Append(kvp.Value);
-                sb.Append("]");
+                sb.Append(']');
             }
 
             int newlineLen = Environment.NewLine.Length;
@@ -206,5 +221,7 @@ namespace OpenIso8583Net.TermAppIso
 
             return offset;
         }
+
+
     }
 }

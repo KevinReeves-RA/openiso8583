@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenIso8583Net.FieldValidator;
+using System.Collections.Generic;
 
 namespace OpenIso8583Net.Tests.ValidatorTests
 {
@@ -10,7 +10,9 @@ namespace OpenIso8583Net.Tests.ValidatorTests
         protected List<string> InvalidValues;
         protected List<string> ValidValues;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         protected BaseValidatorTests(IFieldValidator fieldValidator)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             FieldValidator = fieldValidator;
             ValidValues = new List<string>();

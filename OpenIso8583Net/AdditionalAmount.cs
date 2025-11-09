@@ -7,7 +7,7 @@ namespace OpenIso8583Net
     /// </summary>
     public class AdditionalAmount
     {
-        private string _amount;
+        private string? _amount;
 
         /// <summary>
         ///   Creates a new AdditionalAmount with null values
@@ -20,45 +20,45 @@ namespace OpenIso8583Net
         ///   Constructs an AdditionalAmount object from a string
         /// </summary>
         /// <param name = "value"></param>
-        public AdditionalAmount(String value)
+        public AdditionalAmount(string value)
         {
             if (value.Length != 20)
-                throw new ArgumentException("value incorrect length", "value");
+                throw new ArgumentException("value incorrect length", nameof(value));
 
-            AccountType = value.Substring(0, 2);
+            AccountType = value[..2];
             AmountType = value.Substring(2, 2);
             CurrencyCode = value.Substring(4, 3);
             Sign = value.Substring(7, 1);
-            Amount = value.Substring(8);
+            Amount = value[8..];
         }
 
         /// <summary>
         ///   Gets or sets the Account Type
         /// </summary>
-        public string AccountType { get; set; }
+        public string? AccountType { get; set; }
 
         /// <summary>
         ///   Gets or sets the Amount Type
         /// </summary>
-        public string AmountType { get; set; }
+        public string? AmountType { get; set; }
 
         /// <summary>
         ///   Gets or sets the Currency Code
         /// </summary>
-        public string CurrencyCode { get; set; }
+        public string? CurrencyCode { get; set; }
 
         /// <summary>
         ///   Gets or sets the Sign of the amount. C for credit/positive, D for debit/negative
         /// </summary>
-        public string Sign { get; set; }
+        public string? Sign { get; set; }
 
         /// <summary>
         ///   Gets or sets the amount
         /// </summary>
-        public string Amount
+        public string? Amount
         {
             get { return _amount; }
-            set { _amount = value.PadLeft(12, '0'); }
+            set { _amount = (value ?? "").PadLeft(12, '0'); }
         }
 
         /// <summary>

@@ -33,15 +33,26 @@ namespace OpenIso8583Net.Tests.ValidatorTests
             InvalidValues.Add("\t");
             InvalidValues.Add("\n");
         }
-
         [TestMethod]
-        public void TestTrack2ValidValues()
+        public void TestTrack2Description()
         {
-            TestValidValues();
+            var desc = this.FieldValidator.Description;
+            Assert.AreEqual("track2", desc);
         }
 
         [TestMethod]
+#pragma warning disable S2699 // Add at least one assertion to this test case
+        public void TestTrack2ValidValues()
+#pragma warning restore S2699 // Add at least one assertion to this test case
+
+        {
+            base.TestValidValues();
+        }
+
+        [TestMethod]
+#pragma warning disable S2699 // Add at least one assertion to this test case
         public void TestTrack2InvalidValues()
+#pragma warning restore S2699 // Add at least one assertion to this test case
         {
             TestInvalidValues();
         }

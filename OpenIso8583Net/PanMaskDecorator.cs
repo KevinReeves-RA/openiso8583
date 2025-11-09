@@ -15,9 +15,10 @@
         /// Decorate the decoratedFieldDescriptor.Display with a PCI-DSS PAN mask.
         /// </summary>
         /// <param name="decoratedFieldDescriptor">the target IFieldDescriptor to decorate</param>
-        public PanMaskDecorator(IFieldDescriptor decoratedFieldDescriptor)
+        public PanMaskDecorator(IFieldDescriptor decoratedFieldDescriptor, string displayName = "")
         {
             _decoratedFieldDescriptor = decoratedFieldDescriptor;
+            DisplayName = displayName;
         }
 
         /// <summary>
@@ -26,6 +27,7 @@
         public ILengthFormatter LengthFormatter
         {
             get { return _decoratedFieldDescriptor.LengthFormatter; }
+            set { _decoratedFieldDescriptor.LengthFormatter = value; }
         }
 
         /// <summary>
@@ -42,7 +44,10 @@
         public IFormatter Formatter
         {
             get { return _decoratedFieldDescriptor.Formatter; }
+            set { _decoratedFieldDescriptor.Formatter = value; }
         }
+
+        public string DisplayName { get; private set; }
 
         /// <summary>
         ///   Get the packed length of the field, including a length header if necessary for the given value
@@ -61,9 +66,9 @@
         /// <param name = "fieldNumber">Field number</param>
         /// <param name = "value">field contents</param>
         /// <returns>formatted string representing the field</returns>
-        public string Display(string prefix, int fieldNumber, string value)
+        public string Display(string prefix, int fieldNumber, string? value)
         {
-            return _decoratedFieldDescriptor.Display(prefix, fieldNumber, Utils.MaskPan(value));
+            return _decoratedFieldDescriptor.Display(prefix, fieldNumber, Utils.MaskPan(value) ?? "");
         }
 
         /// <summary>
@@ -93,7 +98,7 @@
         /// <summary>
         /// delegated Adjuster
         /// </summary>
-        public Adjuster Adjuster
+        public Adjuster? Adjuster
         {
             get { return _decoratedFieldDescriptor.Adjuster; }
         }
