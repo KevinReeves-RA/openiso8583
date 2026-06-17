@@ -16,7 +16,7 @@ namespace OpenIso8583Net.Tests
         {
             // TODO: 
 
-            var pds = Iso8583MasterCard.GetPDSFields("0001011Hello World0002019Goodbye Cruel world");
+            var pds = MasterCardMessage.GetPDSFields("0001011Hello World0002019Goodbye Cruel world");
             Assert.AreEqual(2, pds.Count);
             var pds1 = pds["0001"];
             var pds2 = pds["0002"];
@@ -28,7 +28,7 @@ namespace OpenIso8583Net.Tests
         public void EbcdicTest()
         {
             // create ebcdic message
-            var msg = new Iso8583MasterCard(Encoding.GetEncoding(1140));
+            var msg = new MasterCardMessage(Encoding.GetEncoding(1140));
 
             byte[] rawMsg = "F1F6F4F480000100000100000200000000000000F6F9F7F0F8F0F0F1F0F5F0F2F5F0F0F2F2F3F0F6F0F4F0F0F0F0F0F0F3F1F6F6F9F0F0F0F9F5F0F1F1F0F0F2F5F0F0F2F2F3F0F6F0F4F0F0F0F0F0F0F3F1F6F6F9F0F0F0F9F5F0F1F2F2F0F0F1E3F0F1F9F1F0F0F1F2F0F0F0F0F0F0F0F1".ToByteArray();
             msg.Unpack(rawMsg, 0);
@@ -44,7 +44,7 @@ namespace OpenIso8583Net.Tests
         [TestMethod]
         public void EbcdicToAsciiTest()
         {
-            var msg = new Iso8583MasterCard(Encoding.GetEncoding(1140));
+            var msg = new MasterCardMessage(Encoding.GetEncoding(1140));
 
             byte[] rawMsg = "F1F6F4F480000100000100000200000000000000F6F9F7F0F8F0F0F1F0F5F0F2F5F0F0F2F2F3F0F6F0F4F0F0F0F0F0F0F3F1F6F6F9F0F0F0F9F5F0F1F1F0F0F2F5F0F0F2F2F3F0F6F0F4F0F0F0F0F0F0F3F1F6F6F9F0F0F0F9F5F0F1F2F2F0F0F1E3F0F1F9F1F0F0F1F2F0F0F0F0F0F0F0F1".ToByteArray();
             msg.Unpack(rawMsg, 0);
@@ -57,7 +57,7 @@ namespace OpenIso8583Net.Tests
         [TestMethod]
         public void AsciiToEbcdicTest()
         {
-            var msg = new Iso8583MasterCard(Encoding.ASCII);
+            var msg = new MasterCardMessage(Encoding.ASCII);
 
             byte[] rawMsg = "313634348000010000010000020000000000000036393730383030313035303235303032323330363034303030303030333136363930303039353031313030323530303232333036303430303030303033313636393030303935303132323030315430313931303031323030303030303031".ToByteArray();
             msg.Unpack(rawMsg, 0);

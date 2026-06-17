@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OpenIso8583Net\OpenIso8583Net.csproj" />
+    <ProjectReference Include="..\..\..\home\OpenIso8583Net\OpenIso8583Net\OpenIso8583Net.csproj" />
   </ItemGroup>
 
 </Project>
